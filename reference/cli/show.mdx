@@ -1,0 +1,72 @@
+---
+title: "openspec show"
+description: "Display details of a change or spec."
+---
+
+Display details of a change or spec. If no name is provided and `--no-interactive` is not set, you will be prompted to select one.
+
+## Syntax
+
+```bash
+openspec show [item-name] [options]
+```
+
+## Arguments
+
+<ParamField path="item-name" type="string">
+  Name of the change or spec to display. Prompts interactively if omitted.
+</ParamField>
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--type <type>` | Specify type: `change` or `spec`. Auto-detected when unambiguous. |
+| `--json` | Output as JSON. |
+| `--no-interactive` | Disable prompts. |
+
+### Change-specific options
+
+| Option | Description |
+|--------|-------------|
+| `--deltas-only` | Show only delta specs (JSON mode). |
+
+### Spec-specific options
+
+| Option | Description |
+|--------|-------------|
+| `--requirements` | Show only requirements, excluding scenarios (JSON mode). |
+| `--no-scenarios` | Exclude scenario content (JSON mode). |
+| `-r, --requirement <id>` | Show a specific requirement by 1-based index (JSON mode). |
+
+<Note>
+  The `--deltas-only`, `--requirements`, `--no-scenarios`, and `-r` options only take effect when combined with `--json`.
+</Note>
+
+## Examples
+
+```bash
+# Interactive selection
+openspec show
+
+# Show a specific change
+openspec show add-dark-mode
+
+# Show a specific spec
+openspec show auth --type spec
+
+# JSON output for parsing
+openspec show add-dark-mode --json
+
+# Show only delta specs for a change (JSON)
+openspec show add-dark-mode --json --deltas-only
+
+# Show a specific requirement from a spec (JSON)
+openspec show auth --type spec --json -r 2
+```
+
+## Related
+
+- [openspec list](/reference/cli/list) — List all changes or specs
+- [openspec validate](/reference/cli/validate) — Check a change or spec for issues
+- [openspec status](/reference/cli/status) — Display artifact completion status

@@ -1,0 +1,60 @@
+---
+title: "/opsx:propose"
+description: "Create a new change and generate all planning artifacts in one step."
+---
+
+`/opsx:propose` is the default start command in the `core` profile. It creates a change folder and generates all planning artifacts needed before implementation — without requiring any additional commands.
+
+## Syntax
+
+```text
+/opsx:propose [change-name-or-description]
+```
+
+## Arguments
+
+<ParamField path="change-name-or-description" type="string">
+  Kebab-case name or plain-language description of the change. If not provided, the AI will prompt you or infer a name from context.
+</ParamField>
+
+## What it does
+
+- Creates `openspec/changes/<change-name>/`
+- Generates all artifacts needed before implementation (for the `spec-driven` schema: proposal, specs, design, tasks)
+- Stops when the change is ready for `/opsx:apply`
+
+## Example
+
+```text
+You: /opsx:propose add-dark-mode
+
+AI:  Created openspec/changes/add-dark-mode/
+     ✓ proposal.md
+     ✓ specs/ui/spec.md
+     ✓ design.md
+     ✓ tasks.md
+     Ready for implementation. Run /opsx:apply.
+```
+
+## Tips
+
+- Use this for the fastest end-to-end path from idea to implementation
+- If you want step-by-step artifact control, enable expanded workflows and use `/opsx:new` + `/opsx:continue` instead
+- You can pass a plain-language description and the AI will convert it to a kebab-case change name
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="/opsx:apply" icon="code" href="/reference/commands/apply">
+    Implement the tasks created by propose.
+  </Card>
+  <Card title="/opsx:explore" icon="magnifying-glass" href="/reference/commands/explore">
+    Investigate before committing to a change.
+  </Card>
+  <Card title="/opsx:new" icon="plus" href="/reference/commands/new">
+    Start a change scaffold for step-by-step artifact control.
+  </Card>
+  <Card title="/opsx:archive" icon="box-archive" href="/reference/commands/archive">
+    Archive the change once implementation is complete.
+  </Card>
+</CardGroup>

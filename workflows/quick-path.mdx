@@ -1,0 +1,203 @@
+---
+title: "Quick Path (Core Profile)"
+description: "The default OpenSpec workflow: propose, explore, apply, archive."
+---
+
+The `core` profile is the default for new OpenSpec installs. It gives you four commands that cover the full lifecycle of a change without any extra setup.
+
+## The flow
+
+```text
+/opsx:propose ──► /opsx:apply ──► /opsx:archive
+```
+
+One command creates all planning artifacts. Then you implement. Then you archive. That's it for the majority of changes.
+
+## Commands in this profile
+
+| Command | Purpose |
+|---------|----------|
+| `/opsx:propose` | Create a change and generate all planning artifacts in one step |
+| `/opsx:explore` | Think through ideas before committing to a change |
+| `/opsx:apply` | Implement tasks from the change |
+| `/opsx:archive` | Archive a completed change |
+
+## Full walkthrough: adding dark mode
+
+Here's a complete example using the quick path.
+
+<Steps>
+  <Step title="Propose the change">
+    Run `/opsx:propose` with a change name or description. OpenSpec creates the change folder and generates all planning artifacts.
+
+    ```text
+    You: /opsx:propose add-dark-mode
+
+    AI:  Created openspec/changes/add-dark-mode/
+         ✓ proposal.md — why we're doing this, what's changing
+         ✓ specs/       — requirements and scenarios
+         ✓ design.md    — technical approach
+         ✓ tasks.md     — implementation checklist
+         Ready for implementation!
+    ```
+
+    **What gets created:**
+
+    `proposal.md` captures intent:
+
+    ```markdown
+    # Proposal: Add Dark Mode
+
+    ## Intent
+    Users have requested a dark mode option to reduce eye strain
+    during nighttime usage.
+
+    ## Scope
+    - Add theme toggle in settings
+    - Support system preference detection
+    - Persist preference in localStorage
+
+    ## Approach
+    Use CSS custom properties for theming with a React context
+    for state management.
+    ```
+
+    `specs/ui/spec.md` captures the delta requirements:
+
+    ```markdown
+    # Delta for UI
+
+    ## ADDED Requirements
+
+    ### Requirement: Theme Selection
+    The system SHALL allow users to choose between light and dark themes.
+
+    #### Scenario: Manual toggle
+    - GIVEN a user on any page
+    - WHEN the user clicks the theme toggle
+    - THEN the theme switches immediately
+    - AND the preference persists across sessions
+
+    #### Scenario: System preference
+    - GIVEN a user with no saved preference
+    - WHEN the application loads
+    - THEN the system's preferred color scheme is used
+    ```
+
+    `tasks.md` is the implementation checklist:
+
+    ```markdown
+    # Tasks
+
+    ## 1. Theme Infrastructure
+    - [ ] 1.1 Create ThemeContext with light/dark state
+    - [ ] 1.2 Add CSS custom properties for colors
+    - [ ] 1.3 Implement localStorage persistence
+
+    ## 2. UI Components
+    - [ ] 2.1 Create ThemeToggle component
+    - [ ] 2.2 Add toggle to settings page
+    - [ ] 2.3 Update Header to include quick toggle
+
+    ## 3. Styling
+    - [ ] 3.1 Define dark theme color palette
+    - [ ] 3.2 Update components to use CSS variables
+    ```
+  </Step>
+
+  <Step title="Implement the tasks">
+    Run `/opsx:apply` to work through the task list. The AI writes code and checks off items as they're completed.
+
+    ```text
+    You: /opsx:apply
+
+    AI:  Working through tasks...
+         ✓ 1.1 Created ThemeContext with light/dark state
+         ✓ 1.2 Added CSS custom properties to globals.css
+         ✓ 1.3 Implemented localStorage persistence
+         ✓ 2.1 Created ThemeToggle component
+         ...
+         All tasks complete!
+    ```
+
+    If you discover the design needs adjustment mid-implementation, update the artifact and continue—nothing is locked in.
+  </Step>
+
+  <Step title="Archive the change">
+    Run `/opsx:archive` to finalize. The delta specs merge into your main specs and the change folder moves to the archive.
+
+    ```text
+    You: /opsx:archive
+
+    AI:  Archiving add-dark-mode...
+         ✓ Merged specs into openspec/specs/ui/spec.md
+         ✓ Moved to openspec/changes/archive/2025-01-24-add-dark-mode/
+         Done! Ready for the next feature.
+    ```
+  </Step>
+</Steps>
+
+## Using `/opsx:explore` for unclear requirements
+
+Before committing to a change, use `/opsx:explore` to investigate the problem space. No artifacts are created during exploration—it's purely for clarifying thinking.
+
+```text
+You: /opsx:explore
+
+AI:  What would you like to explore?
+
+You: How should we handle rate limiting for our API?
+
+AI:  Let me investigate your current setup and options...
+     [Researches codebase, considers patterns]
+
+     I see three approaches we could take:
+     1. Middleware-based (simple, per-endpoint)
+     2. Redis-backed (scalable, shared state)
+     3. Token bucket per user (fair, complex)
+
+     Your current stack suggests #1 or #2. What's your scale?
+```
+
+Once you know what you want to build, transition to `/opsx:propose`.
+
+<Tip>
+  `/opsx:explore` can read files and search your codebase. Use it whenever you need to investigate before deciding on an approach.
+</Tip>
+
+## Best practices
+
+### Keep changes focused
+
+One logical unit of work per change. If you're doing "add feature X and also refactor Y", consider two separate changes.
+
+**Why it matters:**
+- Easier to review and understand
+- Cleaner archive history
+- Changes can ship independently
+- Simpler rollback if needed
+
+### Name changes clearly
+
+Good names make `openspec list` useful:
+
+```text
+Good:                          Avoid:
+add-dark-mode                  feature-1
+fix-login-redirect             update
+optimize-product-query         changes
+implement-2fa                  wip
+```
+
+## When this is enough vs when to use the expanded workflow
+
+The quick path handles the vast majority of work. Consider switching to the expanded workflow when:
+
+- You want to **review and edit each artifact** before the next one is created
+- You're working on a **complex change** where step-by-step control reduces risk
+- You need `/opsx:verify` to validate implementation before archiving
+- You're managing **multiple parallel changes** and need `/opsx:bulk-archive`
+
+<Note>
+  To enable expanded workflow commands, run `openspec config profile` then `openspec update`.
+</Note>

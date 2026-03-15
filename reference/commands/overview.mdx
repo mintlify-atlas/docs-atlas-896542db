@@ -1,0 +1,115 @@
+---
+title: "Slash Commands"
+description: "Reference for OpenSpec slash commands, invoked in your AI coding assistant's chat interface."
+---
+
+Slash commands are invoked directly in your AI coding assistant's chat interface (Claude Code, Cursor, Windsurf, Copilot, Trae, and others). They tell the AI what workflow step to perform — creating artifacts, implementing tasks, archiving changes, and more.
+
+For workflow patterns and when to use each command, see [Workflows](/workflows/overview). For terminal CLI commands, see [CLI Commands](/reference/cli/overview).
+
+## Core profile commands
+
+The default global profile is `core`. These four commands are available in every project after running `openspec init`.
+
+| Command | Purpose |
+|---|---|
+| [`/opsx:propose`](/reference/commands/propose) | Create a change and generate planning artifacts in one step |
+| [`/opsx:explore`](/reference/commands/explore) | Think through ideas before committing to a change |
+| [`/opsx:apply`](/reference/commands/apply) | Implement tasks from the change |
+| [`/opsx:archive`](/reference/commands/archive) | Archive a completed change |
+
+## Expanded workflow commands
+
+Expanded workflow commands give you fine-grained control over artifact creation, verification, and bulk operations.
+
+| Command | Purpose |
+|---|---|
+| [`/opsx:new`](/reference/commands/new) | Start a new change scaffold |
+| [`/opsx:continue`](/reference/commands/continue) | Create the next artifact based on dependencies |
+| [`/opsx:ff`](/reference/commands/ff) | Fast-forward: create all planning artifacts at once |
+| [`/opsx:verify`](/reference/commands/verify) | Validate implementation matches artifacts |
+| [`/opsx:sync`](/reference/commands/sync) | Merge delta specs into main specs |
+| [`/opsx:bulk-archive`](/reference/commands/bulk-archive) | Archive multiple changes at once |
+| [`/opsx:onboard`](/reference/commands/onboard) | Guided tutorial through the complete workflow |
+
+### Enabling expanded workflow commands
+
+To enable expanded workflow commands in a project:
+
+```bash
+openspec config profile
+```
+
+Select **workflows** in the prompt, then regenerate your project's skill files:
+
+```bash
+openspec update
+```
+
+## Command syntax by AI tool
+
+Different AI tools use slightly different command syntax. Use the format that matches your tool:
+
+| Tool | Syntax example |
+|---|---|
+| Claude Code | `/opsx:propose`, `/opsx:apply` |
+| Cursor | `/opsx-propose`, `/opsx-apply` |
+| Windsurf | `/opsx-propose`, `/opsx-apply` |
+| Copilot (IDE) | `/opsx-propose`, `/opsx-apply` |
+| Trae | `/openspec-propose`, `/openspec-apply-change` |
+
+The intent is the same across tools, but how commands are surfaced differs by integration. Trae uses skill-based invocations and does not generate `opsx-*` command files.
+
+<Warning>
+  GitHub Copilot commands (`.github/prompts/*.prompt.md`) are only available in IDE extensions (VS Code, JetBrains, Visual Studio). GitHub Copilot CLI does not currently support custom prompt files.
+</Warning>
+
+## Legacy commands
+
+These commands use the older all-at-once workflow. They still work but OPSX commands are recommended for new projects.
+
+| Command | What it does |
+|---|---|
+| `/openspec:proposal` | Create all artifacts at once (proposal, specs, design, tasks) |
+| `/openspec:apply` | Implement the change |
+| `/openspec:archive` | Archive the change |
+
+Legacy changes can be continued with OPSX commands — the artifact structure is compatible.
+
+## All commands
+
+<CardGroup cols={2}>
+  <Card title="/opsx:propose" icon="bolt" href="/reference/commands/propose">
+    Create a change and generate all planning artifacts in one step.
+  </Card>
+  <Card title="/opsx:explore" icon="magnifying-glass" href="/reference/commands/explore">
+    Think through ideas and investigate before committing to a change.
+  </Card>
+  <Card title="/opsx:apply" icon="code" href="/reference/commands/apply">
+    Implement tasks from the change, working through the task checklist.
+  </Card>
+  <Card title="/opsx:archive" icon="box-archive" href="/reference/commands/archive">
+    Archive a completed change and merge delta specs.
+  </Card>
+  <Card title="/opsx:new" icon="plus" href="/reference/commands/new">
+    Start a new change scaffold (expanded workflow).
+  </Card>
+  <Card title="/opsx:continue" icon="arrow-right" href="/reference/commands/continue">
+    Create the next artifact in the dependency chain (expanded workflow).
+  </Card>
+  <Card title="/opsx:ff" icon="forward" href="/reference/commands/ff">
+    Fast-forward: create all planning artifacts at once (expanded workflow).
+  </Card>
+  <Card title="/opsx:verify" icon="circle-check" href="/reference/commands/verify">
+    Validate implementation against artifacts (expanded workflow).
+  </Card>
+  <Card title="/opsx:sync" icon="arrows-rotate" href="/reference/commands/sync">
+    Merge delta specs into main specs (expanded workflow).
+  </Card>
+  <Card title="/opsx:bulk-archive" icon="layer-group" href="/reference/commands/bulk-archive">
+    Archive multiple completed changes with conflict resolution (expanded workflow).
+  </Card>
+  <Card title="/opsx:onboard" icon="graduation-cap" href="/reference/commands/onboard">
+    Guided tutorial through the complete workflow using your actual codebase.
+  </Card>
+</CardGroup>

@@ -1,0 +1,95 @@
+---
+title: "openspec validate"
+description: "Validate changes and specs for structural issues."
+---
+
+Validate changes and specs for structural issues. Can validate a single item, a category, or everything at once. Supports `--json` output for use in CI pipelines and AI agents.
+
+## Syntax
+
+```bash
+openspec validate [item-name] [options]
+```
+
+## Arguments
+
+<ParamField path="item-name" type="string">
+  Name of the specific change or spec to validate. Prompts interactively if omitted and `--no-interactive` is not set.
+</ParamField>
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Validate all changes and specs. |
+| `--changes` | Validate all changes. |
+| `--specs` | Validate all specs. |
+| `--type <type>` | Specify type when name is ambiguous: `change` or `spec`. |
+| `--strict` | Enable strict validation mode. |
+| `--json` | Output as JSON. |
+| `--concurrency <n>` | Max parallel validations (default: `6`, or `OPENSPEC_CONCURRENCY` env var). |
+| `--no-interactive` | Disable prompts. |
+
+## Examples
+
+```bash
+# Interactive validation
+openspec validate
+
+# Validate a specific change
+openspec validate add-dark-mode
+
+# Validate all changes
+openspec validate --changes
+
+# Validate everything with JSON output (for CI/scripts)
+openspec validate --all --json
+
+# Strict validation with increased parallelism
+openspec validate --all --strict --concurrency 12
+```
+
+## Output
+
+**Text output:**
+
+```text
+Validating add-dark-mode...
+  ✓ proposal.md valid
+  ✓ specs/ui/spec.md valid
+  ⚠ design.md: missing "Technical Approach" section
+
+1 warning found
+```
+
+**JSON output:**
+
+```json
+{
+  "version": "1.0.0",
+  "results": {
+    "changes": [
+      {
+        "name": "add-dark-mode",
+        "valid": true,
+        "warnings": ["design.md: missing 'Technical Approach' section"]
+      }
+    ]
+  },
+  "summary": {
+    "total": 1,
+    "valid": 1,
+    "invalid": 0
+  }
+}
+```
+
+<Tip>
+  Use `openspec validate --all --json` in CI to get structured results that are easy to parse in scripts or pass to an AI agent.
+</Tip>
+
+## Related
+
+- [openspec show](/reference/cli/show) — Inspect a change or spec
+- [openspec archive](/reference/cli/archive) — Archive a completed change (runs validation by default)
+- [openspec status](/reference/cli/status) — Display artifact completion status

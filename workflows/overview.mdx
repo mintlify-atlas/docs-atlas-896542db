@@ -1,0 +1,163 @@
+---
+title: "Workflows Overview"
+description: "How OpenSpec workflows are structured, when to use each mode, and a quick reference for all commands."
+---
+
+## Philosophy: Actions, not phases
+
+Traditional workflows lock you into sequential phases—planning, then implementing, then done. Real work rarely fits that mold. Requirements shift, scope narrows, discoveries happen mid-implementation.
+
+OpenSpec takes a different approach:
+
+```text
+Traditional (phase-locked):
+
+  PLANNING ────────► IMPLEMENTING ────────► DONE
+      │                    │
+      │   "Can't go back"  │
+      └────────────────────┘
+
+OpenSpec (fluid actions):
+
+  proposal ──► specs ──► design ──► tasks ──► implement
+```
+
+Commands are **actions you can take**, not stages you're stuck in. You can refine earlier artifacts as you learn more during implementation, and the dependency graph shows what's possible—not what's required next.
+
+## Two modes
+
+<Tabs>
+  <Tab title="Quick Path (core profile)">
+    New installs default to the `core` profile, which provides four commands:
+
+    - `/opsx:propose`
+    - `/opsx:explore`
+    - `/opsx:apply`
+    - `/opsx:archive`
+
+    Typical flow:
+
+    ```text
+    /opsx:propose ──► /opsx:apply ──► /opsx:archive
+    ```
+
+    This is the fastest end-to-end path. One command creates all planning artifacts, then you implement and archive.
+  </Tab>
+  <Tab title="Expanded Workflow">
+    If you want explicit scaffold-and-build commands with fine-grained artifact control, enable the expanded workflow:
+
+    ```bash
+    openspec config profile
+    openspec update
+    ```
+
+    This adds: `/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`
+
+    Typical flow:
+
+    ```text
+    /opsx:new ──► /opsx:ff or /opsx:continue ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
+    ```
+  </Tab>
+</Tabs>
+
+## How to switch modes
+
+To enable the expanded workflow commands:
+
+```bash
+openspec config profile
+openspec update
+```
+
+Run `openspec config profile` to select a workflow profile, then `openspec update` to regenerate the command files in your project.
+
+## When to use what
+
+### `/opsx:ff` vs `/opsx:continue`
+
+Both commands create planning artifacts in the expanded workflow, but they work differently:
+
+| Situation | Use |
+|-----------|-----|
+| Clear requirements, ready to build | `/opsx:ff` |
+| Exploring, want to review each step | `/opsx:continue` |
+| Want to iterate on proposal before specs | `/opsx:continue` |
+| Time pressure, need to move fast | `/opsx:ff` |
+| Complex change, want control | `/opsx:continue` |
+
+**Rule of thumb:** If you can describe the full scope upfront, use `/opsx:ff`. If you're figuring it out as you go, use `/opsx:continue`.
+
+### When to update vs start fresh
+
+A common question: when is updating an existing change appropriate, and when should you start a new one?
+
+```text
+                 ┌─────────────────────────────────────┐
+                 │     Is this the same work?          │
+                 └──────────────┬──────────────────────┘
+                                │
+             ┌──────────────────┼──────────────────┐
+             │                  │                  │
+             ▼                  ▼                  ▼
+      Same intent?      >50% overlap?      Can original
+      Same problem?     Same scope?        be "done" without
+             │                  │          these changes?
+             │                  │                  │
+   ┌────────┴────────┐  ┌──────┴──────┐   ┌───────┴───────┐
+   │                 │  │             │   │               │
+  YES               NO YES           NO  NO              YES
+   │                 │  │             │   │               │
+   ▼                 ▼  ▼             ▼   ▼               ▼
+UPDATE            NEW  UPDATE       NEW  UPDATE          NEW
+```
+
+**Update the existing change when:**
+
+- Same intent, refined execution
+- Scope narrows (MVP first, rest later)
+- Learning-driven corrections (codebase isn't what you expected)
+- Design tweaks based on implementation discoveries
+
+**Start a new change when:**
+
+- Intent fundamentally changed
+- Scope exploded to different work entirely
+- Original change can be marked "done" standalone
+- Patches would confuse more than clarify
+
+**Example: "Add dark mode"**
+
+- "Need to also support custom themes" → New change (scope exploded)
+- "System preference detection is harder than expected" → Update (same intent)
+- "Let's ship toggle first, add preferences later" → Update then archive, then new change
+
+## Command quick reference
+
+| Command | Purpose | When to use |
+|---------|---------|-------------|
+| `/opsx:propose` | Create change + planning artifacts | Fast default path (`core` profile) |
+| `/opsx:explore` | Think through ideas | Unclear requirements, investigation |
+| `/opsx:new` | Start a change scaffold | Expanded mode, explicit artifact control |
+| `/opsx:continue` | Create next artifact | Expanded mode, step-by-step artifact creation |
+| `/opsx:ff` | Create all planning artifacts | Expanded mode, clear scope |
+| `/opsx:apply` | Implement tasks | Ready to write code |
+| `/opsx:verify` | Validate implementation | Expanded mode, before archiving |
+| `/opsx:sync` | Merge delta specs | Expanded mode, optional |
+| `/opsx:archive` | Complete the change | All work finished |
+| `/opsx:bulk-archive` | Archive multiple changes | Expanded mode, parallel work |
+
+## Explore the workflows
+
+<Columns cols={2}>
+  <Card title="Quick Path" icon="bolt" href="/workflows/quick-path">
+    The default `core` profile: propose, explore, apply, archive. Best for most changes.
+  </Card>
+  <Card title="Expanded Workflow" icon="map" href="/workflows/expanded-workflow">
+    Fine-grained artifact control with new, continue, ff, verify, and more.
+  </Card>
+</Columns>
+
+<Card title="Parallel Changes" icon="code-branch" href="/workflows/parallel-changes">
+  Work on multiple changes simultaneously and archive them in bulk.
+</Card>

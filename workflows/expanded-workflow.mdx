@@ -1,0 +1,237 @@
+---
+title: "Expanded Workflow"
+description: "Fine-grained artifact control with new, ff, continue, verify, and archive."
+---
+
+The expanded workflow gives you explicit control over each artifact creation step. It's useful for complex changes, exploratory work, and situations where you want to review and refine before moving forward.
+
+## Enable the expanded workflow
+
+<Steps>
+  <Step title="Select a profile">
+    ```bash
+    openspec config profile
+    ```
+    Select the workflows profile when prompted.
+  </Step>
+  <Step title="Regenerate command files">
+    ```bash
+    openspec update
+    ```
+    This writes the expanded command set to your project.
+  </Step>
+</Steps>
+
+After this, you'll have access to: `/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`
+
+## The full flow
+
+```text
+/opsx:new ──► /opsx:ff or /opsx:continue ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
+```
+
+## Pattern 1: Quick feature
+
+When you know what you want to build and just need to execute:
+
+```text
+/opsx:new ──► /opsx:ff ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
+```
+
+**Best for:** Small to medium features, bug fixes, straightforward changes.
+
+### Full example
+
+```text
+You: /opsx:new add-logout-button
+
+AI:  Created openspec/changes/add-logout-button/
+     Ready to create: proposal
+
+You: /opsx:ff
+
+AI:  Creating all planning artifacts...
+     ✓ proposal.md
+     ✓ specs/
+     ✓ design.md
+     ✓ tasks.md
+     Ready for implementation!
+
+You: /opsx:apply
+
+AI:  Working through tasks...
+     ✓ Added logout button to header
+     ✓ Implemented session clearing
+     ✓ Added confirmation dialog
+     All tasks complete!
+
+You: /opsx:archive
+
+AI:  ✓ Merged specs
+     ✓ Archived change
+```
+
+## Pattern 2: Exploratory
+
+When requirements are unclear or you need to investigate first:
+
+```text
+/opsx:explore ──► /opsx:new ──► /opsx:continue ──► ... ──► /opsx:apply
+```
+
+**Best for:** Performance optimization, debugging, architectural decisions, unclear requirements.
+
+### Full example
+
+```text
+You: /opsx:explore
+
+AI:  What would you like to explore?
+
+You: I want to improve page load performance but I'm not sure
+     where the bottlenecks are.
+
+AI:  Let me help investigate...
+     [Analyzes bundle sizes, identifies slow queries, reviews
+     component render patterns]
+
+     I found three main bottlenecks:
+     1. Large unoptimized images
+     2. Synchronous data fetching in ProductList
+     3. Re-renders from context changes
+
+     Which would you like to address first?
+
+You: Let's tackle the data fetching issue.
+
+You: /opsx:new optimize-product-list-fetching
+
+AI:  Created change. Ready to create: proposal
+
+You: /opsx:continue
+
+AI:  Creating proposal based on our exploration...
+     [Writes proposal incorporating investigation insights]
+
+     Ready to create: specs, design
+     Which would you like next?
+
+You: /opsx:continue
+
+AI:  Creating specs...
+```
+
+## Step-by-step artifact control with `/opsx:continue`
+
+`/opsx:continue` creates one artifact at a time. It reads the dependency graph, shows which artifacts are ready vs blocked, and creates the next available one.
+
+```text
+You: /opsx:continue
+
+AI:  Change: add-dark-mode
+
+     Artifact status:
+     ✓ proposal    (done)
+     ◆ specs       (ready)
+     ◆ design      (ready)
+     ○ tasks       (blocked - needs: specs)
+
+     Creating specs...
+
+     [Reads proposal.md, creates specs based on requirements]
+
+     ✓ Created openspec/changes/add-dark-mode/specs/ui/spec.md
+
+     Now available: tasks
+     Run /opsx:continue to create the next artifact.
+```
+
+<Tip>
+  Use `/opsx:continue` when you want to edit each artifact before the next one is created. You can refine the proposal before specs are written, or adjust specs before design begins.
+</Tip>
+
+## The verify → archive completion flow
+
+The recommended completion flow for the expanded workflow:
+
+```text
+/opsx:apply ──► /opsx:verify ──► /opsx:archive
+                    │                 │
+              validates          prompts to sync
+              implementation     if needed
+```
+
+### What verify checks
+
+`/opsx:verify` validates implementation against your artifacts across three dimensions:
+
+| Dimension | What it validates |
+|-----------|------------------|
+| **Completeness** | All tasks done, all requirements implemented, scenarios covered |
+| **Correctness** | Implementation matches spec intent, edge cases handled |
+| **Coherence** | Design decisions reflected in code, patterns consistent |
+
+### Real verify output
+
+```text
+You: /opsx:verify
+
+AI:  Verifying add-auth...
+
+     COMPLETENESS
+     ✓ All 12 tasks in tasks.md are checked
+     ✓ All requirements in specs have corresponding code
+     ⚠ Scenario "Session timeout after inactivity" not tested
+
+     CORRECTNESS
+     ✓ Implementation matches spec intent
+     ✓ Edge cases from scenarios are handled
+     ✓ Error states match spec definitions
+
+     COHERENCE
+     ✓ Design decisions reflected in code structure
+     ✓ Naming conventions consistent with design.md
+     ⚠ Design mentions "event-driven" but implementation uses polling
+
+     SUMMARY
+     ─────────────────────────────
+     Critical issues: 0
+     Warnings: 2
+     Ready to archive: Yes (with warnings)
+
+     Recommendations:
+     1. Add test for session timeout scenario
+     2. Consider refactoring to event-driven as designed, or update design.md
+```
+
+<Note>
+  Verify won't block archive, but it surfaces issues you may want to address first. Warnings indicate potential drift between artifacts and implementation.
+</Note>
+
+### Archive: finalize the change
+
+After verifying, `/opsx:archive` completes the change:
+
+```text
+You: /opsx:archive
+
+AI:  Archiving add-auth...
+
+     Artifact status:
+     ✓ proposal.md exists
+     ✓ specs/ exists
+     ✓ design.md exists
+     ✓ tasks.md exists (12/12 tasks complete)
+
+     Delta specs: Not yet synced to main
+     → Would you like to sync now?
+
+You: Yes
+
+AI:  ✓ Synced specs to openspec/specs/auth/spec.md
+     ✓ Moved to openspec/changes/archive/2025-01-24-add-auth/
+
+     Change archived successfully.
+```
+
+Archive will prompt if specs aren't synced yet. It won't block on incomplete tasks, but it will warn you.

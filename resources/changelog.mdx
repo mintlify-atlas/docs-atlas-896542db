@@ -1,0 +1,216 @@
+---
+title: "Changelog"
+description: "Release history for OpenSpec, including new features, improvements, and bug fixes."
+---
+
+## 1.2.0
+
+### New features
+
+- **Profile system** — Choose between `core` (4 essential workflows) and `custom` (pick any subset) profiles to control which skills get installed. Manage profiles with `openspec config profile`.
+- **Propose workflow** — New one-step `/opsx:propose` workflow creates a complete change proposal with design, specs, and tasks from a single request. No need to run `/opsx:new` then `/opsx:ff` separately.
+- **AI tool auto-detection** — `openspec init` now scans your project for existing tool directories (`.claude/`, `.cursor/`, etc.) and pre-selects detected tools.
+- **Pi (pi.dev) support** — Pi coding agent is now a supported tool with prompt and skill generation.
+- **Kiro support** — AWS Kiro IDE is now a supported tool with prompt and skill generation.
+- **Sync prunes deselected workflows** — `openspec update` now removes command files and skill directories for workflows you've deselected, keeping your project clean.
+- **Config drift warning** — `openspec config list` warns when global config is out of sync with the current project.
+
+### Bug fixes
+
+- Fixed onboard preflight giving a false "not initialized" error on freshly initialized projects.
+- Fixed archive workflow stopping mid-way when syncing — it now properly resumes after sync completes.
+- Added Windows PowerShell alternatives for onboard shell commands.
+
+---
+
+## 1.1.1
+
+### Bug fixes
+
+- **OpenCode command references** — Command references in generated files now use the correct `/opsx-` hyphen format instead of `/opsx:` colon format, ensuring commands work properly in OpenCode.
+
+---
+
+## 1.1.0
+
+### Bug fixes
+
+- **Codex global path support** — Codex adapter now resolves global paths correctly, fixing workflow file generation when run outside the project directory.
+- **Archive operations on cross-device or restricted paths** — Archive now falls back to copy+remove when rename fails with `EPERM` or `EXDEV` errors, fixing failures on networked or external drives.
+- **Slash command hints in workflow messages** — Workflow completion messages now display helpful slash command hints for next steps.
+- **Windsurf workflow file path** — Updated Windsurf adapter to use the correct `workflows` directory instead of the legacy `commands` path.
+
+### Improvements
+
+- **Nix flake maintenance** — Version now read dynamically from `package.json`, reducing manual sync issues.
+- **Nix build optimization** — Source filtering excludes `node_modules` and artifacts, improving build times.
+
+---
+
+## 1.0.2
+
+### Bug fixes
+
+- Clarified spec naming convention — specs should be named after capabilities (`specs/<capability>/spec.md`), not changes.
+- Fixed task checkbox format guidance — tasks now clearly require `- [ ]` checkbox format for apply-phase tracking.
+
+---
+
+## 1.0.1
+
+### Bug fixes
+
+- Fixed incorrect archive path in onboarding documentation — the template now shows the correct path `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+
+---
+
+## 1.0.0 — The OPSX release
+
+The workflow has been rebuilt from the ground up. OPSX replaces the old phase-locked `/openspec:*` commands with an action-based system where the AI understands what artifacts exist, what's ready to create, and what each action unlocks.
+
+### Breaking changes
+
+<Warning>
+  - **Old commands removed** — `/openspec:proposal`, `/openspec:apply`, and `/openspec:archive` no longer exist.
+  - **Config files removed** — Tool-specific instruction files (`CLAUDE.md`, `.cursorrules`, `AGENTS.md`, `project.md`) are no longer generated.
+  - **Migration required** — Run `openspec init` to upgrade. Legacy artifacts are detected and cleaned up with confirmation.
+</Warning>
+
+### From static prompts to dynamic instructions
+
+Instructions are now dynamically assembled from three layers:
+
+1. **Context** — Project background from `config.yaml` (tech stack, conventions)
+2. **Rules** — Artifact-specific constraints
+3. **Template** — The actual structure for the output file
+
+The AI queries the CLI for real-time state: which artifacts exist, what's ready to create, and what dependencies are satisfied.
+
+### New commands
+
+| Command | What it does |
+|---------|-------------|
+| `/opsx:explore` | Think through ideas before committing to a change |
+| `/opsx:new` | Start a new change |
+| `/opsx:continue` | Create one artifact at a time (step-through) |
+| `/opsx:ff` | Create all planning artifacts at once (fast-forward) |
+| `/opsx:apply` | Implement tasks |
+| `/opsx:verify` | Validate implementation matches artifacts |
+| `/opsx:sync` | Sync delta specs to main specs |
+| `/opsx:archive` | Archive a completed change |
+| `/opsx:bulk-archive` | Archive multiple changes with conflict detection |
+| `/opsx:onboard` | Guided 15-minute walkthrough of the complete workflow |
+
+### Semantic spec syncing
+
+Delta specs now use semantic markers:
+
+- `## ADDED Requirements` — New requirements to add
+- `## MODIFIED Requirements` — Partial updates (add a scenario without copying existing ones)
+- `## REMOVED Requirements` — Delete with reason and migration notes
+- `## RENAMED Requirements` — Rename while preserving content
+
+Archive parses these at the requirement level, not by brittle header matching.
+
+### From scattered files to agent skills
+
+Before: 8+ config files at project root and slash commands scattered across 21 tool-specific locations.
+
+Now: A single `.claude/skills/` directory with YAML-fronted markdown files, auto-detected by Claude Code, Cursor, and Windsurf.
+
+### Other new features
+
+- **21 AI tools supported** — Claude Code, Cursor, Windsurf, Continue, Gemini CLI, GitHub Copilot, Amazon Q, Cline, RooCode, Kilo Code, and more.
+- **Interactive setup** — `openspec init` shows an animated welcome screen and searchable multi-select for choosing tools.
+- **Customizable schemas** — Define custom artifact workflows in `openspec/schemas/` without touching package code.
+
+### Bug fixes
+
+- Fixed Claude Code YAML parsing failure when command names contained colons.
+- Fixed task file parsing to handle trailing whitespace on checkbox lines.
+- Fixed JSON instruction output to separate context/rules from template.
+
+---
+
+## 0.23.0
+
+### New features
+
+- **Bulk archive skill** — Archive multiple completed changes in a single operation with `/opsx:bulk-archive`. Includes batch validation, spec conflict detection, and consolidated confirmation.
+- **Simplified setup** — Config creation now uses sensible defaults with helpful comments instead of interactive prompts.
+
+---
+
+## 0.22.0
+
+### New features
+
+- **Project-level configuration** — Configure OpenSpec behavior per-project via `openspec/config.yaml`, including custom rules injection, context files, and schema resolution settings.
+- **Project-local schemas** — Define custom artifact schemas within your project's `openspec/schemas/` directory for project-specific workflows.
+- **Schema management commands** — New `openspec schema` subcommands: `list`, `show`, `export`, `validate`.
+
+---
+
+## 0.21.0
+
+### New features
+
+- **Feedback command** — Submit feedback directly from the CLI with `openspec feedback`, which creates GitHub issues with automatic metadata and a fallback for manual submission.
+- **Nix flake support** — Install and develop OpenSpec using Nix with the new `flake.nix`.
+- **Explore mode guardrails** — Explore mode now explicitly prevents implementation, keeping focus on thinking and discovery.
+
+---
+
+## 0.20.0
+
+### New features
+
+- **`/opsx:verify` command** — Validate that change implementations match their specifications.
+
+### Bug fixes
+
+- Fixed vitest process storms by capping worker parallelism.
+- Fixed agent workflows to use non-interactive mode for validation commands.
+
+---
+
+## 0.19.0
+
+### New features
+
+- **Continue IDE support** — OpenSpec now generates slash commands for Continue, expanding editor integration.
+- **Shell completions** — Run `openspec completion install` to set up tab completion for Bash, Fish, and PowerShell.
+- **`/opsx:explore` command** — A thinking-partner mode for exploring ideas and investigating problems before committing to changes.
+- **Anonymous usage statistics** — Opt-out telemetry to help understand how OpenSpec is used. Set `OPENSPEC_TELEMETRY=0` or `DO_NOT_TRACK=1` to disable. Only command names and version are collected.
+
+---
+
+## 0.18.0
+
+### New features
+
+- `/opsx:ff` — Fast-forward through artifact creation, generating all needed artifacts in one go.
+- `/opsx:sync` — Sync delta specs from a change to main specs.
+- `/opsx:archive` — Archive completed changes with a smart sync check.
+- Per-change schema metadata via `.openspec.yaml` files.
+- Agent Skills for the experimental artifact workflow.
+
+---
+
+## 0.17.0
+
+### New features
+
+- **`openspec config` command** — View and modify global configuration settings.
+- **Oh-my-zsh completions** — Shell completions now support Oh-my-zsh.
+- XDG Base Directory specification support for global config.
+
+### Bug fixes
+
+- Fixed hang in pre-commit hooks caused by eager stdin event listener registration in `@inquirer/prompts`.
+
+---
+
+## Older versions
+
+For full details on versions prior to 0.17.0, see the [CHANGELOG on GitHub](https://github.com/Fission-AI/OpenSpec/blob/main/CHANGELOG.md).

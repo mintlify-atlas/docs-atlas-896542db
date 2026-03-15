@@ -1,0 +1,92 @@
+---
+title: "/opsx:verify"
+description: "Validate that implementation matches your change artifacts across completeness, correctness, and coherence."
+---
+
+<Note>
+  `/opsx:verify` is part of the expanded workflow set. It is not included in the default `core` profile. To enable it, run `openspec config profile`, select workflows, then run `openspec update`.
+</Note>
+
+`/opsx:verify` checks your implementation against the change's planning artifacts. It reports issues categorized as CRITICAL, WARNING, or SUGGESTION. Verify does not block archiving, but surfaces issues before you finalize a change.
+
+## Syntax
+
+```text
+/opsx:verify [change-name]
+```
+
+## Arguments
+
+<ParamField path="change-name" type="string">
+  The name of the change to verify. If not provided, the AI infers the current change from context.
+</ParamField>
+
+## What it does
+
+- Checks three dimensions of implementation quality (see table below)
+- Searches the codebase for implementation evidence
+- Reports issues categorized as CRITICAL, WARNING, or SUGGESTION
+- Does not block archiving, but surfaces issues for your review
+
+## Verification dimensions
+
+| Dimension | What it validates |
+|---|---|
+| **Completeness** | All tasks done, all requirements implemented, scenarios covered |
+| **Correctness** | Implementation matches spec intent, edge cases handled |
+| **Coherence** | Design decisions reflected in code, patterns consistent |
+
+## Example
+
+```text
+You: /opsx:verify
+
+AI:  Verifying add-dark-mode...
+
+     COMPLETENESS
+     ✓ All 8 tasks in tasks.md are checked
+     ✓ All requirements in specs have corresponding code
+     ⚠ Scenario "System preference detection" has no test coverage
+
+     CORRECTNESS
+     ✓ Implementation matches spec intent
+     ✓ Edge cases from scenarios are handled
+     ✓ Error states match spec definitions
+
+     COHERENCE
+     ✓ Design decisions reflected in code structure
+     ✓ Naming conventions consistent with design.md
+     ⚠ Design mentions "CSS variables" but implementation uses Tailwind classes
+
+     SUMMARY
+     ─────────────────────────────
+     Critical issues: 0
+     Warnings: 2
+     Ready to archive: Yes (with warnings)
+
+     Recommendations:
+     1. Add test for system preference detection
+     2. Update design.md to reflect Tailwind usage, or refactor to use CSS variables
+```
+
+## Tips
+
+- Run before archiving to catch mismatches between artifacts and implementation early
+- Warnings do not block archiving — they indicate potential issues worth reviewing
+- Useful for reviewing AI-generated code before committing
+- Can reveal drift between planning artifacts and how the implementation actually turned out
+- Address CRITICAL issues before archiving; WARNINGS and SUGGESTIONS are judgment calls
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="/opsx:apply" icon="code" href="/reference/commands/apply">
+    Implement the change before verifying.
+  </Card>
+  <Card title="/opsx:archive" icon="box-archive" href="/reference/commands/archive">
+    Archive the change after verifying.
+  </Card>
+  <Card title="/opsx:sync" icon="arrows-rotate" href="/reference/commands/sync">
+    Merge delta specs into main specs.
+  </Card>
+</CardGroup>

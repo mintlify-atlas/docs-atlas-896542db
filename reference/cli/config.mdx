@@ -1,0 +1,192 @@
+---
+title: "openspec config"
+description: "View and modify global OpenSpec configuration."
+---
+
+View and modify global OpenSpec configuration. The `config` command provides subcommands for reading, writing, and managing your global settings file.
+
+## Syntax
+
+```bash
+openspec config <subcommand> [options]
+```
+
+## Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| `path` | Show the config file location. |
+| `list` | Show all current settings. |
+| `get <key>` | Get a specific value. |
+| `set <key> <value>` | Set a value. |
+| `unset <key>` | Remove a key. |
+| `reset` | Reset to defaults. |
+| `edit` | Open the config file in `$EDITOR`. |
+| `profile [preset]` | Configure your workflow profile interactively or via preset. |
+
+---
+
+## config path
+
+Show the path to the global config file.
+
+```bash
+openspec config path
+```
+
+---
+
+## config list
+
+Show all current settings.
+
+```bash
+openspec config list
+```
+
+---
+
+## config get
+
+Get a specific configuration value by key.
+
+```bash
+openspec config get <key>
+```
+
+### Example
+
+```bash
+openspec config get telemetry.enabled
+```
+
+---
+
+## config set
+
+Set a configuration value.
+
+```bash
+openspec config set <key> <value>
+```
+
+### Examples
+
+```bash
+# Disable telemetry
+openspec config set telemetry.enabled false
+
+# Set a string value explicitly
+openspec config set user.name "My Name" --string
+```
+
+---
+
+## config unset
+
+Remove a custom setting, restoring the default for that key.
+
+```bash
+openspec config unset <key>
+```
+
+### Example
+
+```bash
+openspec config unset user.name
+```
+
+---
+
+## config reset
+
+Reset all configuration to defaults.
+
+```bash
+openspec config reset [options]
+```
+
+### Example
+
+```bash
+# Reset everything without prompting
+openspec config reset --all --yes
+```
+
+---
+
+## config edit
+
+Open the config file in your `$EDITOR` (or `$VISUAL`).
+
+```bash
+openspec config edit
+```
+
+<Note>
+  This command uses the `EDITOR` or `VISUAL` environment variable to determine which editor to open.
+</Note>
+
+---
+
+## config profile
+
+Configure your workflow profile interactively or apply a named preset.
+
+```bash
+openspec config profile [preset]
+```
+
+### Presets
+
+| Preset | Description |
+|--------|-------------|
+| `core` | Switch workflows to core preset (keeps your current delivery mode). |
+
+### Interactive wizard
+
+Running `openspec config profile` without a preset starts an interactive wizard that begins with a summary of your current settings, then offers these actions:
+
+- **Change delivery + workflows** — Update both your delivery mode and selected workflows.
+- **Change delivery only** — Update only how tool files are delivered (e.g., skills vs. commands).
+- **Change workflows only** — Toggle individual workflows in a checklist.
+- **Keep current settings** — Exit without writing any changes.
+
+<Note>
+  In the workflow checklist, `[x]` means the workflow is selected in global config. Changes to global config do not automatically update existing project files — run `openspec update` to apply them to a project.
+</Note>
+
+<Tip>
+  If the wizard detects that your current project files are out of sync with your global profile or delivery settings, it will warn you and suggest running `openspec update`.
+</Tip>
+
+### Behavior
+
+- If you choose **Keep current settings**, no changes are written and no update prompt is shown.
+- Pressing `Ctrl+C` cancels the flow cleanly (no stack trace) and exits with code `130`.
+- If there are no config changes but the current project files are out of sync, OpenSpec shows a warning and suggests running `openspec update`.
+
+### Examples
+
+```bash
+# Start the interactive profile wizard
+openspec config profile
+
+# Fast preset: switch workflows to core (keeps delivery mode)
+openspec config profile core
+
+# Delivery-only update via interactive wizard
+openspec config profile
+# choose: Change delivery only
+# choose delivery: Skills only
+
+# Workflows-only update via interactive wizard
+openspec config profile
+# choose: Change workflows only
+# toggle workflows in the checklist, then confirm
+```
+
+## Related
+
+- [openspec init](/reference/cli/init) — Initialize a project using your current profile
+- [openspec update](/reference/cli/update) — Apply global profile changes to an existing project

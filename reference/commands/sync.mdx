@@ -1,0 +1,80 @@
+---
+title: "/opsx:sync"
+description: "Merge delta specs from a change into the main specs directory."
+---
+
+<Note>
+  `/opsx:sync` is part of the expanded workflow set. It is not included in the default `core` profile. To enable it, run `openspec config profile`, select workflows, then run `openspec update`.
+</Note>
+
+`/opsx:sync` is an optional command. It merges delta specs from a change into `openspec/specs/` without archiving the change. In most cases, you don't need to call this directly — `/opsx:archive` will prompt you to sync if needed.
+
+## Syntax
+
+```text
+/opsx:sync [change-name]
+```
+
+## Arguments
+
+<ParamField path="change-name" type="string">
+  The name of the change to sync. If not provided, the AI infers the current change from context.
+</ParamField>
+
+## What it does
+
+- Reads delta specs from the change folder
+- Parses ADDED, MODIFIED, REMOVED, and RENAMED sections in the delta specs
+- Merges changes into the main `openspec/specs/` directory
+- Preserves existing content in main specs that is not mentioned in the delta
+- Does not archive the change — the change remains active after sync
+
+## Example
+
+```text
+You: /opsx:sync
+
+AI:  Syncing add-dark-mode delta specs...
+
+     Reading: openspec/changes/add-dark-mode/specs/ui/spec.md
+     Target:  openspec/specs/ui/spec.md
+
+     Changes to apply:
+     ✓ ADDED: Theme Selection requirement (2 scenarios)
+     ✓ ADDED: Accessibility requirement (1 scenario)
+
+     Merging...
+     ✓ openspec/specs/ui/spec.md updated
+
+     Change remains active. Run /opsx:archive when ready to complete.
+```
+
+## When to use manually
+
+| Scenario | Use sync? |
+|---|---|
+| Long-running change, want specs in main before archiving | Yes |
+| Multiple parallel changes need the updated base specs | Yes |
+| Want to preview or review the merge separately | Yes |
+| Quick change, going straight to archive | No — archive handles it |
+
+## Tips
+
+- Sync is intelligent — it adds scenarios to existing requirements without duplicating content
+- The change stays active after sync and must still be archived separately
+- Most workflows will never need to call sync directly — `/opsx:archive` prompts if syncing is needed
+- Useful for long-running changes where other changes need the updated specs before you're done
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="/opsx:archive" icon="box-archive" href="/reference/commands/archive">
+    Archive the change (includes a sync prompt if needed).
+  </Card>
+  <Card title="/opsx:verify" icon="circle-check" href="/reference/commands/verify">
+    Validate implementation before syncing or archiving.
+  </Card>
+  <Card title="/opsx:bulk-archive" icon="layer-group" href="/reference/commands/bulk-archive">
+    Archive multiple changes with automatic conflict resolution.
+  </Card>
+</CardGroup>

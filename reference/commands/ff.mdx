@@ -1,0 +1,70 @@
+---
+title: "/opsx:ff"
+description: "Fast-forward through artifact creation, generating all planning artifacts at once."
+---
+
+<Note>
+  `/opsx:ff` is part of the expanded workflow set. It is not included in the default `core` profile. To enable it, run `openspec config profile`, select workflows, then run `openspec update`.
+</Note>
+
+`/opsx:ff` (fast-forward) creates all planning artifacts for a change in dependency order, tracking progress via a todo list. Use it after `/opsx:new` when you have a clear picture of what you're building and want to skip step-by-step review.
+
+## Syntax
+
+```text
+/opsx:ff [change-name]
+```
+
+## Arguments
+
+<ParamField path="change-name" type="string">
+  The name of the change to fast-forward. If not provided, the AI infers the current change from context.
+</ParamField>
+
+## What it does
+
+- Creates all planning artifacts in dependency order
+- Tracks progress via an internal todo list
+- Reads each dependency before creating the next artifact
+- Stops when all `apply-required` artifacts are complete
+
+## Example
+
+```text
+You: /opsx:ff add-dark-mode
+
+AI:  Fast-forwarding add-dark-mode...
+
+     ✓ Creating proposal.md
+     ✓ Creating specs/ui/spec.md
+     ✓ Creating design.md
+     ✓ Creating tasks.md
+
+     All planning artifacts complete!
+     Ready for implementation. Run /opsx:apply to begin.
+```
+
+## Tips
+
+- Use when you have a clear picture of what you're building and don't need to review each artifact individually
+- Faster than running `/opsx:continue` multiple times for straightforward changes
+- You can still edit any artifact after fast-forward completes — before running `/opsx:apply`
+- Well-suited for small to medium features where the scope is well-understood
+- For complex changes where you want to review and refine each artifact, use `/opsx:continue` instead
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="/opsx:new" icon="plus" href="/reference/commands/new">
+    Start the change scaffold before fast-forwarding.
+  </Card>
+  <Card title="/opsx:continue" icon="arrow-right" href="/reference/commands/continue">
+    Create artifacts one at a time for more control.
+  </Card>
+  <Card title="/opsx:apply" icon="code" href="/reference/commands/apply">
+    Implement the change once all artifacts are ready.
+  </Card>
+  <Card title="/opsx:propose" icon="bolt" href="/reference/commands/propose">
+    Create a change and all artifacts in one step (core profile).
+  </Card>
+</CardGroup>

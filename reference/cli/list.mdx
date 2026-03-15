@@ -1,0 +1,53 @@
+---
+title: "openspec list"
+description: "List changes or specs in your project."
+---
+
+List changes or specs in your project. By default lists active changes sorted by most recent.
+
+## Syntax
+
+```bash
+openspec list [options]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--specs` | List specs instead of changes. |
+| `--changes` | List changes (default). |
+| `--sort <order>` | Sort by `recent` (default) or `name`. |
+| `--json` | Output as JSON. |
+
+## Examples
+
+```bash
+# List all active changes
+openspec list
+
+# List all specs
+openspec list --specs
+
+# JSON output for scripts
+openspec list --json
+```
+
+## Output
+
+**Text output:**
+
+```text
+Active changes:
+  add-dark-mode     UI theme switching support
+  fix-login-bug     Session timeout handling
+```
+
+**JSON output:**
+
+When `--json` is passed, the command returns a structured array of change or spec objects suitable for use in scripts and AI agents.
+
+## Related
+
+- [openspec show](/reference/cli/show) — Display full details for a specific change or spec
+- [openspec validate](/reference/cli/validate) — Check changes and specs for issues

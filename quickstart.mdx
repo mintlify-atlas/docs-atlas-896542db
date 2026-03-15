@@ -1,80 +1,136 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Quick Start"
+description: "Install OpenSpec and run your first spec-driven change in under five minutes."
 ---
 
-## Get started in three steps
+By the end of this guide you will have OpenSpec installed, initialized in a project, and a working `/opsx:propose` workflow running in your AI tool.
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Install OpenSpec">
+    **Requires Node.js 20.19.0 or higher.**
 
-### Step 1: Set up your local environment
+    ```bash
+    npm install -g @fission-ai/openspec@latest
+    ```
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    Verify the install:
 
-### Step 2: Deploy your changes
+    ```bash
+    openspec --version
+    ```
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+  <Step title="Initialize your project">
+    Navigate to your project directory and run:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    ```bash
+    cd your-project
+    openspec init
+    ```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    The interactive setup asks which AI tools you use, then installs the appropriate slash commands and skills. If you want to skip the prompt, pass `--tools` directly:
 
-### Step 3: Go live
+    ```bash
+    openspec init --tools claude,cursor
+    ```
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    After init, you will have an `openspec/` directory at the root of your project.
+
+    <Tip>
+      Not sure which tools are supported? OpenSpec works with 20+ AI assistants including Claude Code, Cursor, GitHub Copilot, Windsurf, Gemini CLI, and more. See the [supported tools reference](/integrations/supported-tools) for the full list.
+    </Tip>
+  </Step>
+
+  <Step title="Propose a change">
+    Open your AI tool and run:
+
+    ```text
+    /opsx:propose add-my-feature
+    ```
+
+    Your AI will create a change folder with all the planning artifacts:
+
+    ```text
+    You: /opsx:propose add-dark-mode
+    AI:  Created openspec/changes/add-dark-mode/
+         ✓ proposal.md — why we're doing this, what's changing
+         ✓ specs/       — requirements and scenarios
+         ✓ design.md    — technical approach
+         ✓ tasks.md     — implementation checklist
+         Ready for implementation!
+    ```
+
+    Review the generated artifacts. You can edit any of them before moving on — update the proposal, refine the specs, or adjust the task list. The AI will work from whatever is in those files.
+  </Step>
+
+  <Step title="Apply the change">
+    Once you are happy with the plan, tell your AI to implement it:
+
+    ```text
+    /opsx:apply
+    ```
+
+    Your AI works through the task checklist in `tasks.md` one item at a time:
+
+    ```text
+    You: /opsx:apply
+    AI:  Implementing tasks...
+         ✓ 1.1 Add theme context provider
+         ✓ 1.2 Create toggle component
+         ✓ 2.1 Add CSS variables
+         ✓ 2.2 Wire up localStorage
+         All tasks complete!
+    ```
+
+    If you discover something needs to change mid-implementation, just update the artifact and continue. There are no phase gates.
+  </Step>
+
+  <Step title="Archive the change">
+    When implementation is complete, archive the change:
+
+    ```text
+    /opsx:archive
+    ```
+
+    OpenSpec merges the delta specs into your main `openspec/specs/` directory and moves the change folder to `openspec/changes/archive/`:
+
+    ```text
+    You: /opsx:archive
+    AI:  Archived to openspec/changes/archive/2025-01-23-add-dark-mode/
+         Specs updated. Ready for the next feature.
+    ```
+  </Step>
+</Steps>
+
+## What just happened?
+
+You ran the core OpenSpec workflow:
+
+| Step | Command | What it does |
+|------|---------|---------------|
+| Propose | `/opsx:propose` | Creates a change folder with proposal, specs, design, and task checklist |
+| Apply | `/opsx:apply` | Implements the task checklist from `tasks.md` |
+| Archive | `/opsx:archive` | Merges delta specs into main specs and moves change to history |
+
+The `openspec/specs/` directory is now your source of truth — a growing record of how your system behaves, updated automatically with every archived change.
+
+<Note>
+  OpenSpec works best with high-reasoning models. Opus 4.5 and GPT 5.2 are recommended for both planning and implementation.
+</Note>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Concepts" icon="book-open" href="/concepts/overview">
+    Understand specs, delta specs, change folders, and how artifacts build on each other.
+  </Card>
+  <Card title="Workflows" icon="workflow" href="/workflows/overview">
+    Learn the expanded workflow commands and common patterns for teams.
+  </Card>
+  <Card title="Commands reference" icon="terminal" href="/reference/commands/overview">
+    Full reference for all slash commands and skills.
+  </Card>
+  <Card title="Supported tools" icon="grid" href="/integrations/supported-tools">
+    See all 20+ supported AI assistants and their install paths.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

@@ -1,0 +1,170 @@
+---
+title: "Specs"
+description: "Behavior contracts organized by domain — the source of truth for how your system works."
+---
+
+Specs are the source of truth in OpenSpec. They describe how your system currently behaves using structured requirements and concrete scenarios.
+
+## What a Spec Is
+
+A spec is a **behavior contract**, not an implementation plan.
+
+It answers the question: *what does this system do?* — not *how does it do it?* Implementation details (class names, library choices, execution plans) belong in `design.md` or `tasks.md`. Specs describe the observable behavior that users and downstream systems rely on.
+
+**Good spec content:**
+- Observable behavior users or downstream systems rely on
+- Inputs, outputs, and error conditions
+- External constraints (security, privacy, reliability, compatibility)
+- Scenarios that can be tested or explicitly validated
+
+**Avoid in specs:**
+- Internal class or function names
+- Library or framework choices
+- Step-by-step implementation details
+- Detailed execution plans
+
+<Tip>
+**Quick test:** If the implementation can change without changing externally visible behavior, it likely does not belong in the spec.
+</Tip>
+
+## Folder Structure
+
+Specs live in `openspec/specs/` organized by domain:
+
+```
+openspec/specs/
+├── auth/
+│   └── spec.md           # Authentication behavior
+├── payments/
+│   └── spec.md           # Payment processing
+├── notifications/
+│   └── spec.md           # Notification system
+└── ui/
+    └── spec.md           # UI behavior and themes
+```
+
+Organize domains in a way that matches how your team thinks about the system. Common patterns:
+
+| Pattern | Example domains |
+|---------|----------------|
+| By feature area | `auth/`, `payments/`, `search/` |
+| By component | `api/`, `frontend/`, `workers/` |
+| By bounded context | `ordering/`, `fulfillment/`, `inventory/` |
+
+## Spec Format
+
+A spec contains requirements, and each requirement has one or more scenarios:
+
+```markdown
+# Auth Specification
+
+## Purpose
+Authentication and session management for the application.
+
+## Requirements
+
+### Requirement: User Authentication
+The system SHALL issue a JWT token upon successful login.
+
+#### Scenario: Valid credentials
+- GIVEN a user with valid credentials
+- WHEN the user submits login form
+- THEN a JWT token is returned
+- AND the user is redirected to dashboard
+
+#### Scenario: Invalid credentials
+- GIVEN invalid credentials
+- WHEN the user submits login form
+- THEN an error message is displayed
+- AND no token is issued
+
+### Requirement: Session Expiration
+The system MUST expire sessions after 30 minutes of inactivity.
+
+#### Scenario: Idle timeout
+- GIVEN an authenticated session
+- WHEN 30 minutes pass without activity
+- THEN the session is invalidated
+- AND the user must re-authenticate
+```
+
+### Key Elements
+
+| Element | Purpose |
+|---------|---------|
+| `## Purpose` | High-level description of this spec's domain |
+| `### Requirement:` | A specific behavior the system must have |
+| `#### Scenario:` | A concrete example of the requirement in action |
+| SHALL / MUST / SHOULD / MAY | RFC 2119 keywords indicating requirement strength |
+
+### RFC 2119 Keywords
+
+Requirement strength is communicated using RFC 2119 keywords:
+
+| Keyword | Meaning |
+|---------|---------|
+| **MUST** / **SHALL** | Absolute requirement — no exceptions |
+| **SHOULD** | Recommended, but exceptions exist |
+| **MAY** | Optional |
+
+### Writing Good Scenarios
+
+**Requirements are the "what"** — they state what the system should do without specifying implementation.
+
+**Scenarios are the "when"** — they provide concrete examples that can be verified. Good scenarios:
+- Are testable (you could write an automated test for each)
+- Cover both happy path and edge cases
+- Use Given/When/Then or similar structured format
+
+## Progressive Rigor
+
+OpenSpec aims to avoid bureaucracy. Use the lightest level that still makes the change verifiable.
+
+<CardGroup cols={2}>
+  <Card title="Lite Spec (default)">
+    - Short behavior-first requirements
+    - Clear scope and non-goals
+    - A few concrete acceptance checks
+
+    Use for most changes.
+  </Card>
+  <Card title="Full Spec (higher risk)">
+    - Cross-team or cross-repo changes
+    - API/contract changes, migrations, security/privacy concerns
+    - Where ambiguity is likely to cause expensive rework
+
+    Use when the cost of getting it wrong is high.
+  </Card>
+</CardGroup>
+
+<Note>
+Most changes should stay in Lite mode. Don't let perfect be the enemy of done.
+</Note>
+
+## Human + Agent Collaboration
+
+In many teams, humans explore and agents draft artifacts. The intended loop is:
+
+<Steps>
+  <Step title="Human provides intent">
+    Share the context, constraints, and goals for the change.
+  </Step>
+  <Step title="Agent drafts requirements and scenarios">
+    The agent converts intent into behavior-first requirements with Given/When/Then scenarios.
+  </Step>
+  <Step title="Agent keeps implementation detail separate">
+    Implementation specifics go in `design.md` and `tasks.md`, not `spec.md`.
+  </Step>
+  <Step title="Validation confirms structure and clarity">
+    Check that specs are readable and unambiguous before implementation begins.
+  </Step>
+</Steps>
+
+This keeps specs readable for humans and consistent for agents.
+
+## Next Steps
+
+Specs grow over time through the changes process. When a change is archived, its delta specs merge into the main specs — keeping the source of truth current. Learn how this works:
+
+- [Changes](/concepts/changes) — how proposed modifications are structured
+- [Artifacts](/concepts/artifacts) — the full set of documents in a change

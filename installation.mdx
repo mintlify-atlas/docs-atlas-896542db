@@ -1,0 +1,147 @@
+---
+title: "Installation"
+description: "Install OpenSpec globally and initialize it in your project."
+---
+
+<Steps>
+  <Step title="Check prerequisites">
+    OpenSpec requires **Node.js 20.19.0 or higher**.
+
+    ```bash
+    node --version
+    ```
+
+    If your version is below `v20.19.0`, update Node.js before continuing.
+  </Step>
+
+  <Step title="Install OpenSpec">
+    Install the package globally using your preferred package manager.
+
+    <CodeGroup>
+
+    ```bash npm
+    npm install -g @fission-ai/openspec@latest
+    ```
+
+    ```bash pnpm
+    pnpm add -g @fission-ai/openspec@latest
+    ```
+
+    ```bash yarn
+    yarn global add @fission-ai/openspec@latest
+    ```
+
+    ```bash bun
+    bun add -g @fission-ai/openspec@latest
+    ```
+
+    ```bash nix
+    # Run directly without installing
+    nix run github:Fission-AI/OpenSpec -- init
+
+    # Or install to your profile
+    nix profile install github:Fission-AI/OpenSpec
+    ```
+
+    </CodeGroup>
+
+    <Note>
+      For Nix flake-based development environments, add OpenSpec to your `flake.nix`:
+
+      ```nix
+      {
+        inputs = {
+          nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+          openspec.url = "github:Fission-AI/OpenSpec";
+        };
+
+        outputs = { nixpkgs, openspec, ... }: {
+          devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+            buildInputs = [ openspec.packages.x86_64-linux.default ];
+          };
+        };
+      }
+      ```
+    </Note>
+  </Step>
+
+  <Step title="Verify installation">
+    ```bash
+    openspec --version
+    ```
+  </Step>
+
+  <Step title="Initialize your project">
+    Navigate to your project directory and run `openspec init`:
+
+    ```bash
+    cd your-project
+    openspec init
+    ```
+
+    The interactive setup will ask which AI tools you use. OpenSpec supports 20+ tools and will install the appropriate slash commands and skills for each one.
+
+    After initialization, your project will have this structure:
+
+    ```text
+    openspec/
+    ├── specs/              # Source of truth (your system's behavior)
+    │   └── <domain>/
+    │       └── spec.md
+    ├── changes/            # Proposed updates (one folder per change)
+    │   └── <change-name>/
+    │       ├── proposal.md
+    │       ├── design.md
+    │       ├── tasks.md
+    │       └── specs/      # Delta specs (what's changing)
+    │           └── <domain>/
+    │               └── spec.md
+    └── config.yaml         # Project configuration (optional)
+    ```
+  </Step>
+</Steps>
+
+## Non-interactive setup
+
+For CI/CD pipelines or scripted environments, pass flags directly to skip the interactive prompt.
+
+### `--tools` flag
+
+Specify which tools to configure without prompting:
+
+```bash
+# Configure specific tools
+openspec init --tools claude,cursor
+
+# Configure all supported tools
+openspec init --tools all
+
+# Skip tool configuration entirely
+openspec init --tools none
+```
+
+**Supported tool IDs:** `amazon-q`, `antigravity`, `auggie`, `claude`, `cline`, `codex`, `codebuddy`, `continue`, `costrict`, `crush`, `cursor`, `factory`, `gemini`, `github-copilot`, `iflow`, `kilocode`, `kiro`, `opencode`, `pi`, `qoder`, `qwen`, `roocode`, `trae`, `windsurf`
+
+### `--profile` flag
+
+Override the default workflow profile for this init run:
+
+```bash
+openspec init --profile core
+```
+
+The default profile is `core`, which installs the `propose`, `explore`, `apply`, and `archive` commands. You can enable expanded workflow commands (`new`, `continue`, `ff`, `verify`, `sync`, `bulk-archive`, `onboard`) later with `openspec config profile` followed by `openspec update`.
+
+## Updating OpenSpec
+
+To update to the latest version, run both steps:
+
+```bash
+# 1. Upgrade the package
+npm install -g @fission-ai/openspec@latest
+
+# 2. Refresh agent instructions in your project
+openspec update
+```
+
+Running `openspec update` inside a project regenerates AI guidance files and ensures the latest slash commands are active.

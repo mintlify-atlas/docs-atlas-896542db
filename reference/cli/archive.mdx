@@ -1,0 +1,59 @@
+---
+title: "openspec archive"
+description: "Archive a completed change and merge its delta specs into the main specs directory."
+---
+
+Archive a completed change and merge delta specs into `openspec/specs/`. This finalizes the change and moves it out of the active `changes/` folder.
+
+## Syntax
+
+```bash
+openspec archive [change-name] [options]
+```
+
+## Arguments
+
+<ParamField path="change-name" type="string">
+  Name of the change to archive. Prompts interactively if omitted.
+</ParamField>
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation prompts. |
+| `--skip-specs` | Skip spec updates. Use for infrastructure, tooling, or doc-only changes that don't affect specs. |
+| `--no-validate` | Skip validation before archiving. Requires confirmation unless `--yes` is also passed. |
+
+## What it does
+
+1. Validates the change (unless `--no-validate`).
+2. Prompts for confirmation (unless `--yes`).
+3. Merges delta specs into `openspec/specs/`.
+4. Moves the change folder to `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+
+## Examples
+
+```bash
+# Interactive archive
+openspec archive
+
+# Archive a specific change
+openspec archive add-dark-mode
+
+# Archive without prompts (for CI/scripts)
+openspec archive add-dark-mode --yes
+
+# Archive a tooling change that doesn't affect specs
+openspec archive update-ci-config --skip-specs
+```
+
+<Warning>
+  Using `--no-validate` skips structural checks before archiving. Only use this when you have already validated the change separately.
+</Warning>
+
+## Related
+
+- [openspec validate](/reference/cli/validate) — Validate a change before archiving
+- [openspec status](/reference/cli/status) — Check whether all required artifacts are complete
+- [openspec list](/reference/cli/list) — List active changes

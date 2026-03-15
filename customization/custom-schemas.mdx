@@ -1,0 +1,277 @@
+---
+title: "Custom Schemas"
+description: "Create your own workflow schemas to define custom artifact sequences, dependencies, and AI instructions for your team's process."
+---
+
+When project config isn't enough, custom schemas let you define an entirely different workflow — your own artifact types, ordering, dependencies, and AI instructions. Custom schemas live in `openspec/schemas/` and are version-controlled with your code.
+
+## When to create a custom schema
+
+Consider a custom schema when:
+
+- Your process has artifacts that don't map to the default `proposal → specs → design → tasks` flow
+- You want to add a step (e.g., a review or security checklist before tasks)
+- You want a faster, leaner workflow without some default artifacts
+- Different teams in your org need different workflows
+
+For most customization needs (injecting context, adding per-artifact rules), [project config](/customization/project-config) is sufficient.
+
+## Project structure
+
+Custom schemas live inside your project's `openspec/` folder:
+
+```text
+your-project/
+├── openspec/
+│   ├── config.yaml        # Project config
+│   ├── schemas/           # Custom schemas live here
+│   │   └── my-workflow/
+│   │       ├── schema.yaml
+│   │       └── templates/
+│   └── changes/           # Your changes
+└── src/
+```
+
+## Forking an existing schema
+
+The fastest way to get started is to fork a built-in schema and edit it:
+
+```bash
+openspec schema fork spec-driven my-workflow
+```
+
+This copies the entire `spec-driven` schema into `openspec/schemas/my-workflow/`.
+
+**What you get:**
+
+```text
+openspec/schemas/my-workflow/
+├── schema.yaml           # Workflow definition
+└── templates/
+    ├── proposal.md       # Template for proposal artifact
+    ├── spec.md           # Template for specs
+    ├── design.md         # Template for design
+    └── tasks.md          # Template for tasks
+```
+
+Edit `schema.yaml` to change the workflow, or edit the templates to change what the AI generates.
+
+## Creating a schema from scratch
+
+For a completely new workflow:
+
+```bash
+# Interactive
+openspec schema init research-first
+
+# Non-interactive
+openspec schema init rapid \
+  --description "Rapid iteration workflow" \
+  --artifacts "proposal,tasks" \
+  --default
+```
+
+## Schema structure
+
+A schema defines the artifacts in your workflow and how they depend on each other:
+
+```yaml
+# openspec/schemas/my-workflow/schema.yaml
+name: my-workflow
+version: 1
+description: My team's custom workflow
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Initial proposal document
+    template: proposal.md
+    instruction: |
+      Create a proposal that explains WHY this change is needed.
+      Focus on the problem, not the solution.
+    requires: []
+
+  - id: design
+    generates: design.md
+    description: Technical design
+    template: design.md
+    instruction: |
+      Create a design document explaining HOW to implement.
+    requires:
+      - proposal    # Can't create design until proposal exists
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist
+    template: tasks.md
+    requires:
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+```
+
+## Schema fields reference
+
+### Artifact fields
+
+| Field | Purpose |
+|-------|---------|
+| `id` | Unique identifier — used in commands and `rules` config |
+| `generates` | Output filename (supports globs like `specs/**/*.md`) |
+| `template` | Template file in the `templates/` directory |
+| `instruction` | AI instructions for creating this artifact |
+| `requires` | Dependencies — which artifacts must exist before this one can be created |
+
+### `apply` section
+
+The `apply` section controls when the `apply` command is available and which file tracks task completion:
+
+| Field | Purpose |
+|-------|---------|
+| `requires` | Artifacts that must exist before `apply` can run |
+| `tracks` | The file (usually `tasks.md`) the agent reads to know what to implement |
+
+## Validating your schema
+
+Before using a custom schema, validate it:
+
+```bash
+openspec schema validate my-workflow
+```
+
+This checks:
+- `schema.yaml` syntax is correct
+- All referenced templates exist
+- No circular dependencies between artifacts
+- Artifact IDs are valid
+
+## Debugging schema resolution
+
+If you're unsure which schema is being loaded, use `schema which`:
+
+```bash
+# See where a specific schema resolves from
+openspec schema which my-workflow
+
+# List all available schemas
+openspec schema which --all
+```
+
+Output shows the source of the resolved schema:
+
+```text
+Schema: my-workflow
+Source: project
+Path: /path/to/project/openspec/schemas/my-workflow
+```
+
+## Schema precedence
+
+When multiple schemas share the same name, OpenSpec uses the first one found:
+
+1. **Project** — `openspec/schemas/<name>/`
+2. **User** — `~/.local/share/openspec/schemas/<name>/`
+3. **Package** — built-in schemas
+
+<Note>
+  User-level schemas at `~/.local/share/openspec/schemas/` are useful for sharing across projects, but project-level schemas are recommended since they're version-controlled with your code.
+</Note>
+
+## Using your custom schema
+
+```bash
+# Specify on the command
+openspec new change feature --schema my-workflow
+```
+
+Or set it as the default in `openspec/config.yaml`:
+
+```yaml
+schema: my-workflow
+```
+
+## Examples
+
+### Rapid iteration workflow
+
+A minimal two-artifact workflow for quick iterations:
+
+```yaml
+# openspec/schemas/rapid/schema.yaml
+name: rapid
+version: 1
+description: Fast iteration with minimal overhead
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Quick proposal
+    template: proposal.md
+    instruction: |
+      Create a brief proposal for this change.
+      Focus on what and why, skip detailed specs.
+    requires: []
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist
+    template: tasks.md
+    requires: [proposal]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+```
+
+### Adding a review artifact
+
+Fork the default schema and add a pre-implementation review step:
+
+<Steps>
+  <Step title="Fork the default schema">
+    ```bash
+    openspec schema fork spec-driven with-review
+    ```
+  </Step>
+  <Step title="Edit schema.yaml to add the review artifact">
+    ```yaml
+      - id: review
+        generates: review.md
+        description: Pre-implementation review checklist
+        template: review.md
+        instruction: |
+          Create a review checklist based on the design.
+          Include security, performance, and testing considerations.
+        requires:
+          - design
+
+      - id: tasks
+        # ... existing tasks config ...
+        requires:
+          - specs
+          - design
+          - review    # Now tasks require review too
+    ```
+  </Step>
+  <Step title="Create the review template">
+    Add `openspec/schemas/with-review/templates/review.md` — see [Templates](/customization/templates) for guidance.
+  </Step>
+  <Step title="Validate the schema">
+    ```bash
+    openspec schema validate with-review
+    ```
+  </Step>
+</Steps>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Templates" href="/customization/templates">
+    Learn how to write effective templates for your custom artifacts.
+  </Card>
+  <Card title="Project Configuration" href="/customization/project-config">
+    Set your custom schema as the project default in config.yaml.
+  </Card>
+</CardGroup>

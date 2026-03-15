@@ -1,0 +1,130 @@
+---
+title: "Schemas"
+description: "Schemas define the artifact types in a workflow and the dependency graph between them."
+---
+
+Schemas define the artifact types in a workflow and how they depend on each other. They control what documents get created, in what order, and with what AI instructions.
+
+## What Schemas Define
+
+A schema specifies:
+- Which **artifact types** exist in the workflow (proposal, specs, design, tasks, or custom types)
+- What **file each artifact generates**
+- What **dependencies** must be satisfied before creating each artifact
+- What **AI instructions** guide the creation of each artifact
+- What **template** the AI uses as a starting point
+
+## The Dependency Graph
+
+Artifacts in a schema form a dependency graph. Here's the built-in `spec-driven` schema:
+
+```yaml
+# openspec/schemas/spec-driven/schema.yaml
+name: spec-driven
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    requires: []              # No dependencies, can create first
+
+  - id: specs
+    generates: specs/**/*.md
+    requires: [proposal]      # Needs proposal before creating
+
+  - id: design
+    generates: design.md
+    requires: [proposal]      # Can create in parallel with specs
+
+  - id: tasks
+    generates: tasks.md
+    requires: [specs, design] # Needs both specs and design first
+```
+
+This produces the following graph:
+
+```
+                    proposal
+                   (root node)
+                       │
+         ┌─────────────┴─────────────┐
+         │                           │
+         ▼                           ▼
+      specs                       design
+   (requires:                  (requires:
+    proposal)                   proposal)
+         │                           │
+         └─────────────┬─────────────┘
+                       │
+                       ▼
+                    tasks
+                (requires:
+                specs, design)
+```
+
+<Note>
+**Dependencies are enablers, not gates.** They show what's possible to create, not what you must create next. You can skip `design.md` if you don't need it. You can create `specs` before or after `design` — both depend only on `proposal`.
+</Note>
+
+## Schema Resolution Order
+
+When OpenSpec needs a schema, it checks in this order:
+
+| Priority | Source | How to set |
+|----------|--------|------------|
+| 1 (highest) | CLI flag | `--schema <name>` |
+| 2 | Change metadata | `.openspec.yaml` in the change folder |
+| 3 | Project config | `openspec/config.yaml` |
+| 4 (default) | Package built-in | `spec-driven` |
+
+This means you can set a project-wide default in `config.yaml` and override it per-change or per-command.
+
+## Built-in Schemas
+
+### spec-driven (default)
+
+The standard workflow for spec-driven development:
+
+```
+proposal → specs → design → tasks → implement
+```
+
+Best for most feature work where you want to agree on specs before implementation begins. The `design.md` step is recommended (but not required) for changes with meaningful architectural complexity.
+
+## Custom Schemas
+
+When the built-in schema doesn't fit your team's workflow, you can create your own.
+
+```bash
+# Fork an existing schema as a starting point
+openspec schema fork spec-driven research-first
+
+# Or create from scratch
+openspec schema init research-first
+```
+
+Custom schemas live in `openspec/schemas/` in your project and are version-controlled with your code.
+
+**Example custom schema:**
+
+```yaml
+# openspec/schemas/research-first/schema.yaml
+name: research-first
+artifacts:
+  - id: research
+    generates: research.md
+    requires: []           # Do research first
+
+  - id: proposal
+    generates: proposal.md
+    requires: [research]   # Proposal informed by research
+
+  - id: tasks
+    generates: tasks.md
+    requires: [proposal]   # Skip specs/design, go straight to tasks
+```
+
+For full details on creating and using custom schemas, see [Custom Schemas](/customization/custom-schemas).
+
+## Related
+
+- [Artifacts](/concepts/artifacts) — the documents that schemas define
+- [Changes](/concepts/changes) — how schemas are applied to a change

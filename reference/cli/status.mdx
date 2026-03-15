@@ -1,0 +1,79 @@
+---
+title: "openspec status"
+description: "Display artifact completion status for a change."
+---
+
+Display artifact completion status for a change. Shows which artifacts are done, ready to create, or blocked by unmet dependencies. Supports `--json` output for use in AI agents determining next steps.
+
+## Syntax
+
+```bash
+openspec status [options]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--change <id>` | Change name to check. Prompts interactively if omitted. |
+| `--schema <name>` | Schema override. Auto-detected from the change's config by default. |
+| `--json` | Output as JSON. |
+
+## Examples
+
+```bash
+# Interactive status check
+openspec status
+
+# Status for a specific change
+openspec status --change add-dark-mode
+
+# JSON output for agent use
+openspec status --change add-dark-mode --json
+```
+
+## Output
+
+**Text output:**
+
+```text
+Change: add-dark-mode
+Schema: spec-driven
+Progress: 2/4 artifacts complete
+
+[x] proposal
+[ ] design
+[x] specs
+[-] tasks (blocked by: design)
+```
+
+**JSON output:**
+
+```json
+{
+  "changeName": "add-dark-mode",
+  "schemaName": "spec-driven",
+  "isComplete": false,
+  "applyRequires": ["tasks"],
+  "artifacts": [
+    {"id": "proposal", "outputPath": "proposal.md", "status": "done"},
+    {"id": "design", "outputPath": "design.md", "status": "ready"},
+    {"id": "specs", "outputPath": "specs/**/*.md", "status": "done"},
+    {"id": "tasks", "outputPath": "tasks.md", "status": "blocked", "missingDeps": ["design"]}
+  ]
+}
+```
+
+Artifact status values:
+
+| Status | Meaning |
+|--------|---------|
+| `done` | Artifact file exists and is complete. |
+| `ready` | Dependencies are satisfied; artifact can be created. |
+| `blocked` | One or more dependency artifacts are not yet done. |
+
+## Related
+
+- [openspec validate](/reference/cli/validate) — Validate a change's artifacts for structural issues
+- [openspec archive](/reference/cli/archive) — Archive a change once all artifacts are complete
+- [openspec show](/reference/cli/show) — Display the contents of a change or spec

@@ -1,0 +1,199 @@
+---
+title: "Troubleshooting"
+description: "Solutions for common OpenSpec errors and unexpected behavior."
+---
+
+## Common errors
+
+<AccordionGroup>
+  <Accordion title='"Change not found"'>
+    The command couldn't identify which change to work on.
+
+    **Solutions:**
+
+    - Specify the change name explicitly:
+      ```text
+      /opsx:apply add-dark-mode
+      ```
+    - Check that the change folder exists:
+      ```bash
+      openspec list
+      ```
+    - Verify you're in the right project directory.
+  </Accordion>
+
+  <Accordion title='"No artifacts ready"'>
+    All artifacts are either complete or blocked by missing dependencies.
+
+    **Solutions:**
+
+    - Run `openspec status` to see what's blocking:
+      ```bash
+      openspec status --change <name>
+      ```
+    - Check if required dependency artifacts exist.
+    - Create the missing dependency artifacts first, then retry.
+  </Accordion>
+
+  <Accordion title='"Schema not found"'>
+    The specified schema doesn't exist in your project or the package.
+
+    **Solutions:**
+
+    - List available schemas:
+      ```bash
+      openspec schemas
+      ```
+    - Check the spelling of your schema name.
+    - If using a custom schema, create it first:
+      ```bash
+      openspec schema init <name>
+      ```
+  </Accordion>
+
+  <Accordion title="Commands not recognized">
+    The AI tool doesn't recognize OpenSpec slash commands.
+
+    **Solutions:**
+
+    - Ensure OpenSpec is initialized in your project:
+      ```bash
+      openspec init
+      ```
+    - Regenerate skills for your tools:
+      ```bash
+      openspec update
+      ```
+    - Check that the skills directory exists (for Claude Code: `.claude/skills/`).
+    - Restart your AI tool — skills are detected at startup.
+
+    <Note>
+      GitHub Copilot commands are only available in IDE extensions (VS Code, JetBrains, Visual Studio). GitHub Copilot CLI does not support custom prompt files.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Artifacts not generating properly">
+    The AI creates incomplete or incorrect artifacts.
+
+    **Solutions:**
+
+    - Add project context to `openspec/config.yaml`:
+      ```yaml
+      context: |
+        Tech stack: TypeScript, React, Node.js
+        Testing: Jest
+        Key constraints: maintain backwards compatibility
+      ```
+    - Add per-artifact rules for specific guidance:
+      ```yaml
+      rules:
+        specs:
+          - Use Given/When/Then format for scenarios
+        proposal:
+          - Include rollback plan for risky changes
+      ```
+    - Provide more detail in your change description when invoking `/opsx:propose`.
+    - Use `/opsx:continue` instead of `/opsx:ff` for step-by-step control over each artifact.
+  </Accordion>
+</AccordionGroup>
+
+## Migration and setup issues
+
+<AccordionGroup>
+  <Accordion title='"Legacy files detected in non-interactive mode"'>
+    You're running `openspec init` or `openspec update` in a CI or non-interactive environment that has legacy files.
+
+    **Solution:** Use the `--force` flag to skip prompts and auto-accept cleanup:
+
+    ```bash
+    openspec init --force
+    ```
+  </Accordion>
+
+  <Accordion title="Commands not appearing after migration">
+    You've migrated from legacy commands but the new OPSX commands don't show up in your AI tool.
+
+    **Solution:** Restart your IDE. Skills are detected at startup.
+  </Accordion>
+
+  <Accordion title='"Unknown artifact ID in rules"'>
+    Your `config.yaml` has a `rules:` key that doesn't match any artifact in the schema.
+
+    **Solution:** Check that your `rules:` keys match the artifact IDs for your schema. For the default `spec-driven` schema, valid IDs are: `proposal`, `specs`, `design`, `tasks`.
+
+    Run this to see all valid artifact IDs:
+
+    ```bash
+    openspec schemas --json
+    ```
+  </Accordion>
+
+  <Accordion title="Config changes not being applied">
+    Changes to `openspec/config.yaml` don't seem to have any effect.
+
+    **Solutions:**
+
+    1. Confirm the file is at `openspec/config.yaml` (not `config.yml` — the `.yaml` extension is required).
+    2. Validate your YAML syntax (indentation errors are common).
+    3. Config changes take effect immediately — no restart needed. Try running a command again.
+  </Accordion>
+
+  <Accordion title="project.md not migrated">
+    The old `openspec/project.md` file still exists after running `openspec init`.
+
+    This is intentional. OpenSpec preserves `project.md` because it may contain project context you've written. You need to migrate it manually:
+
+    1. Review the contents of `openspec/project.md`.
+    2. Move useful context into the `context:` field in `openspec/config.yaml`.
+    3. Move artifact-specific rules into the `rules:` field.
+    4. Delete `project.md` when done.
+
+    See the [Migration Guide](/resources/migration-guide) for a detailed walkthrough.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `OPENSPEC_CONCURRENCY` | Default concurrency for bulk validation (default: `6`). Increase for faster CI runs. |
+| `OPENSPEC_TELEMETRY` | Set to `0` to disable anonymous usage statistics. |
+| `DO_NOT_TRACK` | Set to `1` to disable anonymous usage statistics (alternative to `OPENSPEC_TELEMETRY`). |
+| `EDITOR` or `VISUAL` | Editor opened by `openspec config edit`. |
+| `NO_COLOR` | Disable color output when set. |
+
+<Note>
+  Telemetry collects only command names and version numbers — no arguments, file paths, or content. It is automatically disabled in CI environments.
+</Note>
+
+---
+
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | Error — validation failure, missing files, or other problem |
+
+---
+
+## Getting help
+
+If the solutions above don't resolve your issue, reach out through these channels:
+
+<CardGroup cols={2}>
+  <Card title="Discord community" icon="discord" href="https://discord.gg/YctCnvvshC">
+    Ask questions and get help from the OpenSpec community and team.
+  </Card>
+  <Card title="GitHub issues" icon="github" href="https://github.com/Fission-AI/OpenSpec/issues">
+    Report bugs or request features on the OpenSpec issue tracker.
+  </Card>
+</CardGroup>
+
+You can also submit feedback directly from the CLI:
+
+```bash
+openspec feedback "Description of the issue" --body "More detail here"
+```

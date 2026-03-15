@@ -1,0 +1,177 @@
+---
+title: "Project Configuration"
+description: "Configure OpenSpec for your team using openspec/config.yaml — set a default schema, inject project context, and add per-artifact rules."
+---
+
+The `openspec/config.yaml` file is the simplest way to customize OpenSpec for your project. It covers the most common needs for most teams without requiring custom schemas.
+
+## Customization levels
+
+| Level | What it does | Best for |
+|-------|--------------|----------|
+| **Project Config** | Set defaults, inject context and rules | Most teams |
+| **Custom Schemas** | Define your own workflow artifacts | Teams with unique processes |
+| **Global Overrides** | Share schemas across all projects | Power users |
+
+## What project config does
+
+The `openspec/config.yaml` file lets you:
+
+- **Set a default schema** — skip `--schema` on every command
+- **Inject project context** — AI sees your tech stack, conventions, and constraints
+- **Add per-artifact rules** — custom rules applied only for specific artifacts
+
+## Creating the config
+
+<Steps>
+  <Step title="Run the init command">
+    The interactive setup creates `openspec/config.yaml` for you:
+
+    ```bash
+    openspec init
+    ```
+  </Step>
+  <Step title="Or create it manually">
+    Create `openspec/config.yaml` in your project root:
+
+    ```yaml
+    # openspec/config.yaml
+    schema: spec-driven
+
+    context: |
+      Tech stack: TypeScript, React, Node.js, PostgreSQL
+      API style: RESTful, documented in docs/api.md
+      Testing: Jest + React Testing Library
+      We value backwards compatibility for all public APIs
+
+    rules:
+      proposal:
+        - Include rollback plan
+        - Identify affected teams
+      specs:
+        - Use Given/When/Then format
+        - Reference existing patterns before inventing new ones
+    ```
+  </Step>
+</Steps>
+
+## Config fields
+
+### `schema`
+
+The default schema to use when no `--schema` flag is provided and the change folder doesn't specify one.
+
+```yaml
+schema: spec-driven
+```
+
+With this set, the following two commands are equivalent:
+
+```bash
+# Without config
+openspec new change my-feature --schema spec-driven
+
+# With config — schema is automatic
+openspec new change my-feature
+```
+
+### `context`
+
+Free-form text injected into **every** artifact prompt. Use it to describe your tech stack, conventions, or any information the AI should always have.
+
+```yaml
+context: |
+  Tech stack: TypeScript, React, Node.js, PostgreSQL
+  API style: RESTful, documented in docs/api.md
+  Testing: Jest + React Testing Library
+  We value backwards compatibility for all public APIs
+```
+
+### `rules`
+
+Per-artifact rules injected **only** when that specific artifact is being generated. Keys match artifact IDs in your schema (e.g., `proposal`, `specs`, `design`, `tasks`).
+
+```yaml
+rules:
+  proposal:
+    - Include rollback plan
+    - Identify affected teams
+  specs:
+    - Use Given/When/Then format
+    - Reference existing patterns before inventing new ones
+```
+
+## How context and rules are injected
+
+When generating any artifact, your context and rules are added to the AI prompt in XML blocks:
+
+```xml
+<context>
+Tech stack: TypeScript, React, Node.js, PostgreSQL
+...
+</context>
+
+<rules>
+- Include rollback plan
+- Identify affected teams
+</rules>
+
+<template>
+[Schema's built-in template]
+</template>
+```
+
+- **`context`** appears in prompts for **all** artifacts
+- **`rules`** appear only for the **matching artifact**
+
+## Schema resolution order
+
+When OpenSpec needs to determine which schema to use, it checks in this order:
+
+1. CLI flag: `--schema <name>`
+2. Change metadata (`.openspec.yaml` in the change folder)
+3. Project config (`openspec/config.yaml`)
+4. Default (`spec-driven`)
+
+<Tip>
+  You can always override the project config default by passing `--schema` directly on the command.
+</Tip>
+
+## Example: setting tech stack context
+
+A practical `openspec/config.yaml` for a TypeScript monorepo:
+
+```yaml
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript, React 18, Node.js 20, PostgreSQL with Prisma ORM
+  Monorepo: packages/api (Express), packages/web (Vite + React), packages/shared
+  API style: RESTful JSON, versioned under /api/v1/
+  Auth: JWT with refresh tokens, handled in packages/api/src/auth/
+  Testing: Vitest for unit tests, Playwright for E2E
+  We avoid breaking changes to public API contracts
+
+rules:
+  proposal:
+    - Include rollback plan
+    - Identify affected packages in the monorepo
+    - Note any public API surface changes
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Reference existing patterns before inventing new ones
+  tasks:
+    - Group tasks by package (api, web, shared)
+    - Include migration steps for any database changes
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Custom Schemas" href="/customization/custom-schemas">
+    Go beyond config — define your own workflow artifacts and dependencies.
+  </Card>
+  <Card title="Templates" href="/customization/templates">
+    Customize the markdown templates that guide AI artifact generation.
+  </Card>
+</CardGroup>

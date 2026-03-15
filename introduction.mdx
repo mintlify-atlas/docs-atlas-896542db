@@ -1,0 +1,59 @@
+---
+title: "Introduction"
+description: "OpenSpec is a spec-driven development CLI that helps you and your AI coding assistant agree on what to build before any code is written."
+---
+
+AI coding assistants are powerful but unpredictable when requirements live only in chat history. OpenSpec adds a lightweight spec layer so you and your AI align on _what_ to build before writing any code.
+
+## What is OpenSpec?
+
+OpenSpec is a CLI tool for **spec-driven development (SDD)** with AI coding assistants. It installs slash commands and skills into your existing AI tools — Claude Code, Cursor, Copilot, and 20+ others — so every change starts with a proposal and ends with archived specs.
+
+The core workflow is three commands:
+
+```text
+/opsx:propose ──► /opsx:apply ──► /opsx:archive
+```
+
+1. **Propose** — your AI generates a change folder with a proposal, specs, design, and task checklist.
+2. **Apply** — your AI works through the task checklist and implements the change.
+3. **Archive** — your AI merges the delta specs into your main specs and moves the change to history.
+
+## Philosophy
+
+OpenSpec is built around four principles:
+
+- **Fluid, not rigid** — update any artifact at any time; no phase gates
+- **Iterative, not waterfall** — refine specs as you learn during implementation
+- **Easy, not complex** — three commands cover most workflows
+- **Brownfield-first** — designed to work on existing codebases, not just new projects
+
+## Why it exists
+
+Without specs, AI coding means vague prompts and unpredictable results. You describe what you want in chat, the AI writes code, and if it's wrong you start over. There's no shared record of what was agreed, no checklist to work through, and no documentation left behind.
+
+OpenSpec fixes this by making every change explicit:
+
+- **Agree before you build** — human and AI align on specs before code gets written
+- **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
+- **Work fluidly** — update any artifact anytime, no rigid phase gates
+- **Use your tools** — works with 20+ AI assistants via slash commands
+
+## How it compares
+
+**vs. Spec Kit (GitHub)** — Thorough but heavyweight. Spec Kit uses rigid phase gates, lots of Markdown ceremony, and requires Python setup. OpenSpec is lighter and lets you iterate freely.
+
+**vs. Kiro (AWS)** — Powerful but you're locked into their IDE and limited to Claude models. OpenSpec works with the tools you already use.
+
+**vs. nothing** — AI coding without specs means vague prompts and unpredictable results. OpenSpec brings predictability without the ceremony.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Install OpenSpec and run your first `/opsx:propose` in minutes.
+  </Card>
+  <Card title="Concepts" icon="book-open" href="/concepts/overview">
+    Understand specs, changes, delta specs, and how artifacts fit together.
+  </Card>
+</CardGroup>

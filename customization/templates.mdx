@@ -1,0 +1,182 @@
+---
+title: "Templates"
+description: "Customize the markdown templates that guide AI when generating workflow artifacts."
+---
+
+Templates are markdown files that guide the AI when creating a workflow artifact. Every artifact in a schema has a corresponding template that is injected into the AI prompt at generation time.
+
+## What templates are
+
+A template is a markdown file that provides the AI with:
+
+- **Section headers** it should fill in
+- **HTML comments** with guidance about what each section should contain
+- **Example formats** showing the expected structure
+
+Templates don't contain the final content — they're scaffolding that tells the AI what to produce.
+
+## Where templates live
+
+Each schema has a `templates/` directory alongside its `schema.yaml`:
+
+```text
+openspec/schemas/my-workflow/
+├── schema.yaml
+└── templates/
+    ├── proposal.md
+    ├── spec.md
+    ├── design.md
+    └── tasks.md
+```
+
+Each artifact in `schema.yaml` references its template by filename:
+
+```yaml
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: proposal.md   # References templates/proposal.md
+    ...
+```
+
+## Template format
+
+Templates use standard markdown with HTML comments for AI guidance:
+
+```markdown
+<!-- templates/proposal.md -->
+## Why
+
+<!-- Explain the motivation for this change. What problem does this solve? -->
+
+## What Changes
+
+<!-- Describe what will change. Be specific about new capabilities or modifications. -->
+
+## Impact
+
+<!-- Affected code, APIs, dependencies, systems -->
+```
+
+The AI reads the section headers and the comments to understand what content to generate for each section.
+
+## How templates are injected
+
+When an artifact is generated, the template is included in the AI prompt inside a `<template>` block, alongside your project context and any per-artifact rules:
+
+```xml
+<context>
+Tech stack: TypeScript, React, Node.js, PostgreSQL
+...
+</context>
+
+<rules>
+- Include rollback plan
+- Identify affected teams
+</rules>
+
+<template>
+## Why
+
+<!-- Explain the motivation for this change. What problem does this solve? -->
+
+## What Changes
+
+<!-- Describe what will change. Be specific about new capabilities or modifications. -->
+
+## Impact
+
+<!-- Affected code, APIs, dependencies, systems -->
+</template>
+```
+
+The AI uses the template as the structural blueprint for the artifact it generates.
+
+## Best practices
+
+<Tip>
+  Keep section names short and action-oriented. The AI treats headings as intent signals — "Why" and "Impact" produce better results than "Background and Motivation" or "Downstream Effects".
+</Tip>
+
+**Include sections the AI should fill in.** Every section in your template should have a clear purpose. If a section is always empty, remove it.
+
+**Use HTML comments for guidance, not placeholders.** Comments like `<!-- Describe the API contract -->` give the AI direction without polluting the generated output. Placeholder text like `[Add description here]` ends up in the final artifact.
+
+**Show example formats where structure matters.** For tasks templates, showing the expected checkbox format helps:
+
+```markdown
+## Tasks
+
+<!-- List all implementation tasks as checkboxes.
+     Group by component or layer.
+     Example:
+     - [ ] Update API endpoint signature
+     - [ ] Write migration script
+     - [ ] Add unit tests for edge cases
+-->
+```
+
+**Keep templates focused.** A template with 10 sections produces verbose artifacts. Most artifacts work well with 3–5 sections.
+
+## Customizing templates after forking
+
+After forking a schema, templates are plain markdown files you can edit freely:
+
+<Steps>
+  <Step title="Fork a built-in schema">
+    ```bash
+    openspec schema fork spec-driven my-workflow
+    ```
+  </Step>
+  <Step title="Locate the template to edit">
+    ```text
+    openspec/schemas/my-workflow/templates/
+    ├── proposal.md
+    ├── spec.md
+    ├── design.md
+    └── tasks.md
+    ```
+  </Step>
+  <Step title="Edit the template">
+    Open any `.md` file in the `templates/` directory and adjust the section headers and guidance comments to match your team's conventions.
+  </Step>
+  <Step title="Validate the schema">
+    ```bash
+    openspec schema validate my-workflow
+    ```
+
+    This confirms the templates referenced in `schema.yaml` all exist.
+  </Step>
+</Steps>
+
+## Checking which template is used
+
+To see the resolved template path for each artifact:
+
+```bash
+# Show template paths for a schema
+openspec templates --schema my-workflow
+```
+
+Output:
+
+```text
+Schema: my-workflow
+
+Templates:
+  proposal  → openspec/schemas/my-workflow/templates/proposal.md
+  specs     → openspec/schemas/my-workflow/templates/spec.md
+  design    → openspec/schemas/my-workflow/templates/design.md
+  tasks     → openspec/schemas/my-workflow/templates/tasks.md
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Custom Schemas" href="/customization/custom-schemas">
+    Define custom artifact workflows that reference your templates.
+  </Card>
+  <Card title="Project Configuration" href="/customization/project-config">
+    Inject context and rules alongside templates in AI prompts.
+  </Card>
+</CardGroup>

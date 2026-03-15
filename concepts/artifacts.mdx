@@ -1,0 +1,170 @@
+---
+title: "Artifacts"
+description: "The documents within a change: proposal, specs, design, and tasks — each building on the last."
+---
+
+Artifacts are the documents within a change that capture intent, specifications, technical approach, and implementation steps. Each artifact provides context for the next.
+
+## The Artifact Flow
+
+```
+proposal ──────► specs ──────► design ──────► tasks ──────► implement
+    │               │             │              │
+   why            what           how          steps
+ + scope        changes       approach      to take
+```
+
+Artifacts build on each other in sequence — but you can always go back and refine an earlier artifact as you learn more during implementation.
+
+## Artifact Types
+
+### proposal.md
+
+The proposal captures **intent**, **scope**, and **approach** at a high level. It answers: *why are we doing this, and what are we changing?*
+
+```markdown
+# Proposal: Add Dark Mode
+
+## Intent
+Users have requested a dark mode option to reduce eye strain
+during nighttime usage and match system preferences.
+
+## Scope
+In scope:
+- Theme toggle in settings
+- System preference detection
+- Persist preference in localStorage
+
+Out of scope:
+- Custom color themes (future work)
+- Per-page theme overrides
+
+## Approach
+Use CSS custom properties for theming with a React context
+for state management. Detect system preference on first load,
+allow manual override.
+```
+
+**When to update the proposal:**
+- Scope changes (narrowing or expanding)
+- Intent clarifies as you develop a better understanding of the problem
+- Approach fundamentally shifts
+
+### specs/ (delta specs)
+
+Delta specs describe **what's changing** relative to the current specs. They use ADDED / MODIFIED / REMOVED sections to indicate the type of change.
+
+See [Changes](/concepts/changes) for the full delta spec format and how it works.
+
+### design.md
+
+The design captures **technical approach** and **architecture decisions**. It answers: *how are we going to build this?*
+
+````markdown
+# Design: Add Dark Mode
+
+## Technical Approach
+Theme state managed via React Context to avoid prop drilling.
+CSS custom properties enable runtime switching without class toggling.
+
+## Architecture Decisions
+
+### Decision: Context over Redux
+Using React Context for theme state because:
+- Simple binary state (light/dark)
+- No complex state transitions
+- Avoids adding Redux dependency
+
+### Decision: CSS Custom Properties
+Using CSS variables instead of CSS-in-JS because:
+- Works with existing stylesheet
+- No runtime overhead
+- Browser-native solution
+
+## Data Flow
+```
+ThemeProvider (context)
+       │
+       ▼
+ThemeToggle ◄──► localStorage
+       │
+       ▼
+CSS Variables (applied to :root)
+```
+
+## File Changes
+- `src/contexts/ThemeContext.tsx` (new)
+- `src/components/ThemeToggle.tsx` (new)
+- `src/styles/globals.css` (modified)
+````
+
+**When to update the design:**
+- Implementation reveals the approach won't work
+- A better solution is discovered
+- Dependencies or constraints change
+
+<Note>
+The design is optional — only create it when the change has meaningful architectural complexity. See the [spec-driven schema](/concepts/schemas) for when design is recommended.
+</Note>
+
+### tasks.md
+
+Tasks are the **implementation checklist** — concrete steps with checkboxes that can be tracked through completion.
+
+```markdown
+# Tasks
+
+## 1. Theme Infrastructure
+- [ ] 1.1 Create ThemeContext with light/dark state
+- [ ] 1.2 Add CSS custom properties for colors
+- [ ] 1.3 Implement localStorage persistence
+- [ ] 1.4 Add system preference detection
+
+## 2. UI Components
+- [ ] 2.1 Create ThemeToggle component
+- [ ] 2.2 Add toggle to settings page
+- [ ] 2.3 Update Header to include quick toggle
+
+## 3. Styling
+- [ ] 3.1 Define dark theme color palette
+- [ ] 3.2 Update components to use CSS variables
+- [ ] 3.3 Test contrast ratios for accessibility
+```
+
+**Task best practices:**
+- Group related tasks under numbered headings
+- Use hierarchical numbering (1.1, 1.2, 2.1, etc.)
+- Keep tasks small enough to complete in one session
+- Check tasks off as you complete them
+- Order tasks by dependency — what must be done first?
+
+<Tip>
+The `apply` phase parses checkbox format to track progress. Tasks not using `- [ ]` format won't be tracked.
+</Tip>
+
+## Artifact Summary
+
+| Artifact | Answers | When to update |
+|----------|---------|----------------|
+| `proposal.md` | Why are we doing this? What changes? | Scope or intent shifts |
+| `specs/` | What behavior is changing? | New requirements discovered |
+| `design.md` | How will we build it? | Approach changes |
+| `tasks.md` | What steps do we take? | New tasks surface during implementation |
+
+## The Update Loop
+
+Artifacts are not write-once documents. As implementation progresses and you learn more:
+
+```
+proposal ──► specs ──► design ──► tasks ──► implement
+   ▲           ▲          ▲                    │
+   └───────────┴──────────┴────────────────────┘
+            update as you learn
+```
+
+If implementation reveals that the design won't work, update the design. If you discover a new requirement, update the specs. This is expected and normal — OpenSpec is designed for iteration.
+
+## Related
+
+- [Changes](/concepts/changes) — how artifacts are bundled together in a change folder
+- [Schemas](/concepts/schemas) — how artifact types and their dependencies are defined

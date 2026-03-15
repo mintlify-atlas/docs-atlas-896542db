@@ -1,0 +1,124 @@
+---
+title: "Multi-Language Support"
+description: "Generate OpenSpec artifacts in any language by adding a language instruction to your project's context config."
+---
+
+OpenSpec is language-agnostic — it passes your configuration to the AI as context, so you can instruct the AI to write artifacts in any language your team works in.
+
+## How it works
+
+Language configuration is handled through the `context` field in `openspec/config.yaml`. Because context is injected into every artifact prompt, a single language instruction applies to all generated artifacts.
+
+## Quick setup
+
+Add a language instruction to your `openspec/config.yaml`:
+
+```yaml
+schema: spec-driven
+
+context: |
+  Language: Portuguese (pt-BR)
+  All artifacts must be written in Brazilian Portuguese.
+
+  # Your other project context below...
+  Tech stack: TypeScript, React, Node.js
+```
+
+All generated artifacts will now be in Portuguese.
+
+## Language examples
+
+<CodeGroup>
+
+```yaml Portuguese (Brazil)
+context: |
+  Language: Portuguese (pt-BR)
+  All artifacts must be written in Brazilian Portuguese.
+```
+
+```yaml Spanish
+context: |
+  Idioma: Español
+  Todos los artefactos deben escribirse en español.
+```
+
+```yaml Chinese (Simplified)
+context: |
+  语言：中文（简体）
+  所有产出物必须用简体中文撰写。
+```
+
+```yaml Japanese
+context: |
+  言語：日本語
+  すべての成果物は日本語で作成してください。
+```
+
+```yaml French
+context: |
+  Langue : Français
+  Tous les artefacts doivent être rédigés en français.
+```
+
+```yaml German
+context: |
+  Sprache: Deutsch
+  Alle Artefakte müssen auf Deutsch verfasst werden.
+```
+
+</CodeGroup>
+
+## Tips
+
+### Handling technical terms
+
+You can instruct the AI to keep specific terms in English while writing prose in your target language:
+
+```yaml
+context: |
+  Language: Japanese
+  Write in Japanese, but:
+  - Keep technical terms like "API", "REST", "GraphQL" in English
+  - Code examples and file paths remain in English
+```
+
+### Combining with other context
+
+Language settings are just another line in your `context` block and work alongside all other project context:
+
+```yaml
+schema: spec-driven
+
+context: |
+  Language: Portuguese (pt-BR)
+  All artifacts must be written in Brazilian Portuguese.
+
+  Tech stack: TypeScript, React 18, Node.js 20
+  Database: PostgreSQL with Prisma ORM
+```
+
+<Tip>
+  Put the language instruction at the top of your `context` block so it's the first thing the AI reads.
+</Tip>
+
+## Verifying your configuration
+
+To confirm the language context is being picked up correctly, inspect the instructions for any artifact:
+
+```bash
+# Check the instructions — should show your language context
+openspec instructions proposal --change my-change
+```
+
+The output will include your language instruction in the `<context>` block.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Project Configuration" href="/customization/project-config">
+    Learn how context is injected into all AI prompts.
+  </Card>
+  <Card title="Supported Tools" href="/integrations/supported-tools">
+    See all 24 AI coding assistants that OpenSpec integrates with.
+  </Card>
+</CardGroup>

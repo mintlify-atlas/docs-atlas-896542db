@@ -1,0 +1,83 @@
+---
+title: "openspec init"
+description: "Initialize OpenSpec in your project, creating the folder structure and configuring AI tool integrations."
+---
+
+Initialize OpenSpec in your project. Creates the folder structure and configures AI tool integrations.
+
+Default behavior uses global config defaults: profile `core`, delivery `both`, workflows `propose, explore, apply, archive`.
+
+## Syntax
+
+```bash
+openspec init [path] [options]
+```
+
+## Arguments
+
+<ParamField path="path" type="string">
+  Target directory. Defaults to the current directory.
+</ParamField>
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--tools <list>` | Configure AI tools non-interactively. Use `all`, `none`, or a comma-separated list of tool IDs. |
+| `--force` | Auto-cleanup legacy files without prompting. |
+| `--profile <profile>` | Override global profile for this init run (`core` or `custom`). |
+
+<Note>
+  `--profile custom` uses whatever workflows are currently selected in your global config (`openspec config profile`).
+</Note>
+
+## Supported tool IDs
+
+Use any of the following IDs with `--tools`:
+
+```
+amazon-q, antigravity, auggie, claude, cline, codex, codebuddy, continue,
+costrict, crush, cursor, factory, gemini, github-copilot, iflow, kilocode,
+kiro, opencode, pi, qoder, qwen, roocode, trae, windsurf
+```
+
+## What it creates
+
+```
+openspec/
+├── specs/              # Your specifications (source of truth)
+├── changes/            # Proposed changes
+└── config.yaml         # Project configuration
+
+.claude/skills/         # Claude Code skills (if claude selected)
+.cursor/skills/         # Cursor skills (if cursor selected)
+.cursor/commands/       # Cursor OPSX commands (if delivery includes commands)
+... (other tool configs)
+```
+
+## Examples
+
+```bash
+# Interactive initialization
+openspec init
+
+# Initialize in a specific directory
+openspec init ./my-project
+
+# Non-interactive: configure for Claude and Cursor
+openspec init --tools claude,cursor
+
+# Configure for all supported tools
+openspec init --tools all
+
+# Override profile for this run
+openspec init --profile core
+
+# Skip prompts and auto-cleanup legacy files
+openspec init --force
+```
+
+## Related
+
+- [openspec update](/reference/cli/update) — Re-generate tool files after upgrading
+- [openspec config](/reference/cli/config) — View and modify global configuration

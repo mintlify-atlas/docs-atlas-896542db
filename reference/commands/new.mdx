@@ -1,0 +1,76 @@
+---
+title: "/opsx:new"
+description: "Start a new change scaffold with metadata, ready for artifact creation."
+---
+
+<Note>
+  `/opsx:new` is part of the expanded workflow set. It is not included in the default `core` profile. To enable it, run `openspec config profile`, select workflows, then run `openspec update`.
+</Note>
+
+`/opsx:new` creates a change folder and metadata file, then waits for you to generate artifacts with `/opsx:continue` (one at a time) or `/opsx:ff` (all at once). Use this when you want fine-grained control over artifact creation.
+
+## Syntax
+
+```text
+/opsx:new [change-name] [--schema <schema-name>]
+```
+
+## Arguments
+
+<ParamField path="change-name" type="string">
+  Name for the change folder in kebab-case. If not provided, the AI will prompt you.
+</ParamField>
+
+<ParamField path="--schema" type="string">
+  Workflow schema to use. Defaults to the schema set in project config, or `spec-driven` if not configured.
+</ParamField>
+
+## What it does
+
+- Creates `openspec/changes/<change-name>/` directory
+- Creates a `.openspec.yaml` metadata file in the change folder (records schema and creation date)
+- Shows the first artifact template ready for creation
+- Prompts for change name and schema if not provided
+
+## What it creates
+
+```text
+openspec/changes/<change-name>/
+└── .openspec.yaml    # Change metadata (schema, created date)
+```
+
+## Example
+
+```text
+You: /opsx:new add-dark-mode
+
+AI:  Created openspec/changes/add-dark-mode/
+     Schema: spec-driven
+
+     Ready to create: proposal
+     Use /opsx:continue to create it, or /opsx:ff to create all artifacts.
+```
+
+## Tips
+
+- Use descriptive names: `add-feature`, `fix-bug`, `refactor-module`
+- Avoid generic names like `update`, `changes`, or `wip`
+- The schema can also be set project-wide in `openspec/config.yaml` to avoid specifying it each time
+- After creating a scaffold, use `/opsx:continue` to create artifacts one at a time, or `/opsx:ff` to create them all at once
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="/opsx:continue" icon="arrow-right" href="/reference/commands/continue">
+    Create the next artifact one at a time.
+  </Card>
+  <Card title="/opsx:ff" icon="forward" href="/reference/commands/ff">
+    Fast-forward: create all artifacts at once.
+  </Card>
+  <Card title="/opsx:propose" icon="bolt" href="/reference/commands/propose">
+    Create a change and all artifacts in one step (core profile).
+  </Card>
+  <Card title="/opsx:apply" icon="code" href="/reference/commands/apply">
+    Implement the change once artifacts are ready.
+  </Card>
+</CardGroup>
